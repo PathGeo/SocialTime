@@ -15,9 +15,10 @@ var app={
 			"demographicData":null,
 			selectedZipcodeLayer:null
 	},
-	geocodingResult:{
+	socialMediaResult:{
 			type:"GEOJSON",
 			url: null,
+			json:null,
 			title: null,
 			column:{
 				statistics:""
@@ -38,23 +39,27 @@ var app={
 		        			.find("ul li").click(function(){
 					        	var $this=$(this),
 					        		value=$this.attr("layer"),
-					        		layer=app.geocodingResult[value];
-					        	
-					        	//if this layer is already shown on the map, hide the layer and change the color
-					        	if(layer._map){
-									//if(value=='heatMapLayer') alert(value);
-									//document.getElementById('slider').style.opacity = "0";
-					        		app.map.removeLayer(layer);
-					        		$this.css({"background-color": ''});
-					        	}else{
-					        		layer.addTo(app.map);
-					        		$this.css({"background-color": '#5B92C0'});
+					        		layer=app.socialMediaResult[value];
+					        		
 									
-									//show heatmap radius content
-									if(value=='heatMapLayer'){
-										$("#heatmap_radius").show()
-									}
-					        	}
+					        	//if this layer is already shown on the map, hide the layer and change the color
+					        	if(layer){
+									if(layer._map){
+										//if(value=='heatMapLayer') alert(value);
+										//document.getElementById('slider').style.opacity = "0";
+						        		app.map.removeLayer(layer);
+						        		$this.css({"background-color": ''});
+						        	}else{
+						        		layer.addTo(app.map);
+						        		$this.css({"background-color": '#5B92C0'});
+										
+										//show heatmap radius content
+										if(value=='heatMapLayer'){
+											$("#heatmap_radius").show()
+										}
+						        	}
+								}
+								
 					        });
 		        
 		        return container
@@ -408,8 +413,8 @@ function showLayer(obj, isShow){
 				
 					var layers=[], 
 						zipcodes={},
-						statisticsColumn=obj.column.statistics,
-						totalSum=obj.dataTable.statisticsColumn[statisticsColumn].sum;
+						statisticsColumn=obj.column.statistics;
+						//totalSum=obj.dataTable.statisticsColumn[statisticsColumn].sum;
 					
 			
 					//marker layer
@@ -494,25 +499,25 @@ function showLayer(obj, isShow){
 
 					
 					//zipcodes
-					var totalColumnValue=obj.dataTable.statisticsColumn[statisticsColumn].sum;
-					$.each(zipcodes, function(i,zipcodeLayer){
-						var properties=zipcodeLayer.feature.properties;
-						
-						//bind popup on the zipcode layer
-						zipcodeLayer.bindPopup(
-							"<div class='zipcodePopup'><h3>Your customers in Zipcode: " + properties["ZIP"] + "</h3>"+
-							"<ul class='objToHtml'>"+
-							"<li><b>Total Number: </b>" + properties["extra-count"] + "</li>"+
-							"<li><b>Total Sales: </b>" + parseFloat(properties["extra-"+statisticsColumn+"_sum"]).toFixed(2) + " (" + parseFloat(properties["extra-"+statisticsColumn+"_sum"] / totalColumnValue).toFixed(4)*100 + "%)</li>"+
-							"<li><div id='zipcodeChart'></div></li>"+
-							"</ul>"+
-							""//"<a href='#' onclick=\"showDemographicData('" + properties["ZIP"] +"');\" style='cursor:pointer;'>See more about the zipcode area.....</a></div>"
-						);
-						zipcodeLayer.on('click', function(e){
-							showZipcodeChart("zipcodeChart", properties["ZIP"], properties["extra-"+statisticsColumn+"_sum"], totalColumnValue);
-						});
-					})
-					obj.zipcodeLayer=zipcodes;
+//					var totalColumnValue=obj.dataTable.statisticsColumn[statisticsColumn].sum;
+//					$.each(zipcodes, function(i,zipcodeLayer){
+//						var properties=zipcodeLayer.feature.properties;
+//						
+//						//bind popup on the zipcode layer
+//						zipcodeLayer.bindPopup(
+//							"<div class='zipcodePopup'><h3>Your customers in Zipcode: " + properties["ZIP"] + "</h3>"+
+//							"<ul class='objToHtml'>"+
+//							"<li><b>Total Number: </b>" + properties["extra-count"] + "</li>"+
+//							"<li><b>Total Sales: </b>" + parseFloat(properties["extra-"+statisticsColumn+"_sum"]).toFixed(2) + " (" + parseFloat(properties["extra-"+statisticsColumn+"_sum"] / totalColumnValue).toFixed(4)*100 + "%)</li>"+
+//							"<li><div id='zipcodeChart'></div></li>"+
+//							"</ul>"+
+//							""//"<a href='#' onclick=\"showDemographicData('" + properties["ZIP"] +"');\" style='cursor:pointer;'>See more about the zipcode area.....</a></div>"
+//						);
+//						zipcodeLayer.on('click', function(e){
+//							showZipcodeChart("zipcodeChart", properties["ZIP"], properties["extra-"+statisticsColumn+"_sum"], totalColumnValue);
+//						});
+//					})
+//					obj.zipcodeLayer=zipcodes;
 					
 					
 					//add geojsonlayer to toc
@@ -605,7 +610,7 @@ function showLayer(obj, isShow){
 						'value': getRadius(0)
 					}).on("slidestop", function(e){
 						var radius=e.currentTarget.value;
-						var geocodingResult=app.geocodingResult;
+						var geocodingResult=app.socialMediaResult;
 						//remove existing heatmap
 						if(geocodingResult.heatMapLayer._map){app.map.removeLayer(geocodingResult.heatMapLayer);}
 						app.controls.toc.removeLayer(geocodingResult.heatMapLayer);

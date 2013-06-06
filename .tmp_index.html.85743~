@@ -67,7 +67,7 @@
 		<div id='header' class='ui-bar ui-bar-b'  >
 			<h1>
 				<img src='images/PathGeo-color.png' height=35px onclick='window.open("http://www.pathgeo.com")'/>
-				<div>SocialMedia : <label id='lbl_dataName'></label></div>
+				<div>MapTime : <label id='lbl_dataName'></label></div>
 			</h1>
 			
 			<!--<a href="#dialog_login" data-rel='popup' data-role='button' data-position-to="window" data-inline="true" data-transition="fade" data-icon="home" class="" data-mini="true" style='float:right'>Log in</a>-->
@@ -84,7 +84,7 @@
 			<!-- toolbox-->
 			<div id='menuToolbox'>
 				<ul>
-					<!--<li title='Your Uploaded Data' onclick='showInfoPanel("dataPanel", this)'><img src='images/1368495654_document.png' /></li>-->
+					<li title='Your Uploaded Data' onclick='showInfoPanel("dataPanel", this)'><img src='images/1368495654_document.png' /></li>
 					<!--<li title='Chart' onclick='showInfoPanel("chartPanel")'><img src='images/1368495559_chart_bar_up.png' /></li>-->
 					<!--<li title='Find the Best Business Actions' onclick='showInfoPanel("localInfoPanel", this);$("#businessActions_type").change()'><img src='images/1368666773_money.png' /></li>-->
 					<li title='Search Social Media' onclick='showInfoPanel("socialMediaPanel", this);'><img src='images/1368666894_comment_check.png' /></li>
@@ -120,7 +120,6 @@
 			
 			<h2>MapTime can help you analyze customer needs, target marketing actions, <br>improve business reputation, and secure more customers</h2>
 			<ul>
-				<!--
 				<li>
 					<div onclick='$("#dialog_menu").popup("close"); setTimeout(function(){$("#dialog_uploadData").popup("open");}, 200);'>
 						<img src='images/1367841372_Drive_Upload.png'/><p></p>
@@ -131,7 +130,6 @@
 					<input type='button' value='Try San Francisco Demo Data' style='' onclick='var init_interval=setInterval(function(){if(app.layers.demographicData){clearInterval(init_interval);$("#dialog_menu").popup("close"); showDemo("SAN FRANCISCO");}}, 100)'   />
 					<input type='button' value='Try San Diego Demo Data' style='' onclick='var init_interval=setInterval(function(){if(app.layers.demographicData){clearInterval(init_interval);$("#dialog_menu").popup("close"); showDemo("SAN DIEGO");}}, 100)'   />
 				</li>
-				-->
 				<li>
 					<img src='images/map-icons.png' width='300px' height='96px' /><p></p>
 					<h1>Search Social Media</h1>
@@ -533,7 +531,6 @@ COPYRIGHT © 2013 PATHGEO INC. ALL RIGHTS RESERVED. PATHGEO™, THE PATHGEO LOGO
 
 					<!-- change social media map type-->
 					<div id='socialMedia_mapType'>
-						<!--
 						<fieldset data-role="controlgroup" data-type="horizontal">
 					        <input type="radio" name="socialMedia_mapType" id="socialMedia_mapType_point" class='socialMedia_mapType' value="point" checked="checked" onclick='switchLayersMedia("point")' data-theme='a'>
 					        <label for="socialMedia_mapType_point">Point Map</label>
@@ -543,7 +540,6 @@ COPYRIGHT © 2013 PATHGEO INC. ALL RIGHTS RESERVED. PATHGEO™, THE PATHGEO LOGO
 					        <label for="socialMedia_mapType_heatmap">HotSpot Map</label>
 					    </fieldset>
 						<label>Map Type: </label>
-						-->
 					</div>
 					
 					

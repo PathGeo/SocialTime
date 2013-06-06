@@ -110,7 +110,7 @@ function callPython(inputValue){
 				data: o.data,
 				beforeSend: function(xhr){if (xhr.overrideMimeType) {xhr.overrideMimeType("application/json");}},
 				success: function(contact){
-					//console.log(contact);
+				
 					if (curLayer && app.map.hasLayer(curLayer)){
 						app.map.removeLayer(curLayer);
 					}
@@ -120,6 +120,23 @@ function callPython(inputValue){
 						$("#layer_selector, #socialMedia_loading").hide();
 						alert("No results were found. Please use another keywords or remove location (ex: @) to try again.");
 					}else {
+						//create layer
+						app.socialMediaResult={
+							type:"GEOJSON",
+							url: null,
+							json: {
+								type:"FeatureCollection",
+								features:contact
+							},
+							column:{
+								statistics:""
+							},
+							keywords:keywordArray,
+							title: "[" + source + "] " + keyword
+						}
+						showLayer(app.socialMediaResult,true);
+						
+						
 						//append source header in the listview
 						$("#search_results").html('')
 											.append("<li data-role='list-divider'>" + source + "<span class='ui-li-count'>" + contact.length + "</span></li>")
