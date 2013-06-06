@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PathGeo-MapTime</title>
+    <meta name="viewport" http-equiv="Content-Type" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	
+	<link type="text/css" href='js/jquery/jquery.mobile-1.3.0.min.css' rel="stylesheet" />
+	<link rel="stylesheet" href="js/leaflet/leaflet.css" />
+	<!--[if lte IE 8]><link rel="stylesheet" href="js/leaflet/leaflet.ie.css" /><![endif]-->
+	<link rel="stylesheet" href="js/leaflet/MarkerCluster.css" />
+	<link rel="stylesheet" href="js/leaflet/MarkerCluster.Default.css" />
+	<link rel="stylesheet" href="css/jquery.dataTables.css" />
+	<link rel="stylesheet" href="css/slider/nivo-slider.css" />
+	<!--[if lte IE 8]><link rel="stylesheet" href="js/leaflet/MarkerCluster.Default.ie.css" /><![endif]-->
+	<!--[if IE]><link type="text/css" href='css/main_ie.css' rel="stylesheet" /><![endif]-->
+	<!--[if !IE]><!--><link type="text/css" href='css/main.css' rel="stylesheet" /><!--<![endif]-->
+	
+    <!--jquery-->
+	<script src="js/jquery/jquery-1.8.2.min.js" type="text/javascript"></script>
+    <script src="js/jquery/jquery.mobile-1.3.0.min.js" type="text/javascript"></script>
+	<!-- Jquery Plugin -->
+	<script src="js/jquery/jquery.dataTables.min.js" type="text/javascript"></script>
+	<script src="js/jquery/ColVis.min.js" type="text/javascript"></script>
+	<script src="js/jquery/dataTables.scroller.min.js" type="text/javascript"></script>
+	<script src="js/jquery/jquery.form.js"></script> 
+
+	<!--leaflet-->
+	<script src="js/leaflet/leaflet.js" type="text/javascript"></script>
+	<script src="js/leaflet/leaflet.markercluster.js" type="text/javascript"></script>
+	<script src="js/leaflet/heatmap.js" type="text/javascript"></script>
+	<script src="js/leaflet/heatmap-leaflet.js" type="text/javascript"></script>
+	<script src="js/leaflet/QuadTree.js" type="text/javascript"></script>
+	
+	<!--google map-->
+    <script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
+    	
+	<!--JTS Topology suite-->
+	<script src="js/jsts/javascript.util.js" type="text/javascript"></script>
+    <script src="js/jsts/jsts.js" type="text/javascript"></script>
+	
+	<!--google chart-->
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>  
+	
+	<!-- slider-->
+	<script type="text/javascript" src="js/jquery/jquery.nivo.slider.pack.js"></script> 
+	
+	<!-- api -->
+	<script src="js/api/pathgeo.layer.js" type="text/javascript"></script>
+	<script src="js/api/pathgeo.util.js" type="text/javascript"></script>
+	<script src="js/api/pathgeo.service.js" type="text/javascript"></script>
+   
+   	<!-- Data -->
+	<!--<script src="db/sanFran.js"></script>-->
+	<script src="db/ACS_Sanfrancisco.js"></script>
+	
+    <!-- main -->
+ 	<script src="js/main.js" type="text/javascript"></script>
+	<script src="js/social_media.js" type="text/javascript"></script>
+	
+  </head>
+  
+  
+  <body>
+  	<div data-role="page" id='pageMap'>
+  		
+		<!--header-->
+		<div id='header' class='ui-bar ui-bar-b'  >
+			<h1>
+				<img src='images/PathGeo-color.png' height=35px onclick='window.open("http://www.pathgeo.com")'/>
+				<div>MapTime : <label id='lbl_dataName'></label></div>
+			</h1>
+			
+			<!--<a href="#dialog_login" data-rel='popup' data-role='button' data-position-to="window" data-inline="true" data-transition="fade" data-icon="home" class="" data-mini="true" style='float:right'>Log in</a>-->
+	        <a href="#dialog_help" data-rel='popup' data-role='button' data-position-to="window" data-inline="true" data-transition="fade" data-icon="info" class="" data-mini="true" style='float:right'>Help</a>
+			<a href="#dialog_lab" data-rel='popup' data-role='button' data-position-to="window" data-inline="true" data-transition="fade" data-icon="grid" class="" data-mini="true" style='float:right'>Lab</a>
+			<a id='test' href="#dialog_menu" data-rel='popup' data-role='button' data-position-to="window" data-inline="true" data-transition="fade" data-icon="grid" class="" data-mini="true" style='float:right'>Menu</a>
+		</div>
+		
+
+		
+		
+		<!-- content-->
+		<div id='content'>
+			<!-- toolbox-->
+			<div id='menuToolbox'>
+				<ul>
+					<li title='Your Uploaded Data' onclick='showInfoPanel("dataPanel", this)'><img src='images/1368495654_document.png' /></li>
+					<!--<li title='Chart' onclick='showInfoPanel("chartPanel")'><img src='images/1368495559_chart_bar_up.png' /></li>-->
+					<!--<li title='Find the Best Business Actions' onclick='showInfoPanel("localInfoPanel", this);$("#businessActions_type").change()'><img src='images/1368666773_money.png' /></li>-->
+					<li title='Search Social Media' onclick='showInfoPanel("socialMediaPanel", this);'><img src='images/1368666894_comment_check.png' /></li>
+					<!--<li title='Account Settings' onclick='showInfoPanel("userPanel", this)'><img src='images/1368496469_man.png' /></li>-->
+					<!--<li title='Main Menu' onclick='$("#uploadData_confirm").hide(); $("#uploadData_description").show(); $("#uploadData_controls").hide();$("#dialog_menu").popup("open")'><img src='images/1368496597_outbox.png' /></li>
+					<li title='Help' onclick='$("#dialog_help").popup("open")'><img src='images/1368495535_help.png' /></li>
+					<li title='About us' onclick=''><img src='images/1368495810_home.png' /></li>-->
+				</ul>
+			</div>
+			
+			
+			<!-- map-->
+			<div id="div_map"></div>	
+		</div>
+		
+	
+		<!-- heatmap radius window-->
+		<div id='heatmap_radius' >
+			<div id='heatmap_radiusArrow'></div>
+			<div id='heatmap_radiusContent' class='ui-corner-all'>
+				<form>
+				    <label for="heatmap_slider">Slider:</label>
+				    <input type="range" name="heatmap_slider" id="heatmap_slider" data-track-theme="d" data-theme="b" data-mini='true' min="0" max="100" value="50">
+				</form>
+			</div>
+		</div>
+		
+		
+		
+		<!--main menu-->
+		<div id='dialog_menu' data-role="popup" data-overlay-theme="a" data-theme="c" data-dismissible="false" data-history="false" style=''>
+			<a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right" >Close</a>
+			
+			<h2>MapTime can help you analyze customer needs, target marketing actions, <br>improve business reputation, and secure more customers</h2>
+			<ul>
+				<li>
+					<div onclick='$("#dialog_menu").popup("close"); setTimeout(function(){$("#dialog_uploadData").popup("open");}, 200);'>
+						<img src='images/1367841372_Drive_Upload.png'/><p></p>
+						<h1>Upload Data</h1>
+						<label class='menu_description'>Upload you data and <Br>find more patterns with demographic and social media data</label>
+					</div>
+					<P></P><br>
+					<input type='button' value='Try San Francisco Demo Data' style='' onclick='var init_interval=setInterval(function(){if(app.layers.demographicData){clearInterval(init_interval);$("#dialog_menu").popup("close"); showDemo("SAN FRANCISCO");}}, 100)'   />
+					<input type='button' value='Try San Diego Demo Data' style='' onclick='var init_interval=setInterval(function(){if(app.layers.demographicData){clearInterval(init_interval);$("#dialog_menu").popup("close"); showDemo("SAN DIEGO");}}, 100)'   />
+				</li>
+				<li>
+					<img src='images/map-icons.png' width='300px' height='96px' /><p></p>
+					<h1>Search Social Media</h1>
+					<label class='menu_description'>Search Social Media <Br>by keywords and locations</label><P></P><br>
+
+					<div data-role="fieldcontain" style='width:100%; margin:0.5em 0'>
+				         <label for="input_location" style='float:left; padding-top:6px;'>Search: <img src='images/1370463075_help.png' style='width:18px;' title='You can use "@" to specify a location.' /></label>
+				         <input type="text" name="input_location" id="input_location" value="Aztecs@San Diego" onkeypress='if(event.which==13 || event.keyCode==13){searchBusinessIntelligent(this.value);return false;}else{return true;}'>
+						 <input type='button' value='Search' onclick='callPython($("#input_location").val());$("#dialog_menu").popup("close");showInfoPanel("socialMediaPanel", $("#menuToolbox li[title=\"Search Social Media\"]")[0]);$("#socialMedia_keyword").val($("#input_location").val());' data-theme="" />
+				    </div>
+				</li>
+			</ul>
+		</div>
+		
+		
+		
+		
+		
+	
+		<!-- dialog -->
+		<!-- upload data -->
+		<div id='dialog_uploadData' data-role="popup" data-overlay-theme="a" data-theme="c" data-dismissible="false" style=''>
+			<a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+			
+			<form action="saveTable.py" method="post" id="uploadData_form" enctype="multipart/form-data" style="width: 90%; margin: 0 auto;">
+				<fieldset>
+				
+					<input type="file" name="photo" id="uploadData_input" size="70%">
+					
+					<!-- upload content -->
+					<!-- NOTE: STILL WORKING ON LAYOUT -->
+					
+					<div id='uploadData_content'>
+						<div id='uploadData_description' >
+							<h3>Upload and Map Your Data:</h3><br>
+							MapTime only support XLS format for this beta version. <P></P>
+							We will support more data formats in the near future.	
+						</div>
+						
+						<div id='uploadData_confirm' style='display:none'>
+							<!--<img id='img_loading' src="images/loading.gif" width=15px  />-->
+							
+							<div data-role="fieldcontain">
+								<label for="uploadData_geocodingField">Select geocoding column: </label>
+								
+								<!--<select id='uploadData_geocodingField' name='uploadData_geocodingField' data-mini='true'> </select>-->
+								<div id="uploadData_geocodingFields" style="height: 100px; background-color: white; color: black; padding-top: 10px; overflow: auto;">
+								
+								</div>
+							</div>
+							
+							<div id='uploadData_agreement'>
+								PathGeo Subscription Agreement<br>
+
+CAREFULLY READ THE FOLLOWING TERMS AND CONDITIONS OF THIS SUBSCRIPTION AGREEMENT.  BY CLICKING ON THE “ACCEPT” BUTTON ACCOMPANYING THIS SUBSCRIPTION AGREEMENT OR BY USING THE PATHGEO SERVICE, YOU INDICATE THE ACCEPTANCE OF THE FOLLOWING TERMS AND CONDITIONS AND YOU AGREE TO BE BOUND BY THEM.  IF YOU DO NOT AGREE TO BE BOUND BY THESE TERMS AND CONDITIONS, YOU MAY NOT USE THE PATHGEO SERVICE.
+<br>
+THIS SUBSCRIPTION AGREEMENT CONSTITUTES THE COMPLETE AND EXCLUSIVE STATEMENT OF THE AGREEMENT BETWEEN YOU AND PATHGEO WITH RESPECT TO THE PATHGEO SERVICE AND SUPERSEDES ANY PROPOSAL OR PRIOR AGREEMENT, ORAL OR WRITTEN, AND ANY OTHER COMMUNICATIONS RELATING TO THE SUBJECT MATTER OF THIS AGREEMENT. 
+
+By clicking on the “Accept” button accompanying this Subscription Agreement (the “Agreement”) or by using the PathGeo Services (as defined below) accompanying this Agreement, you (hereafter “Client”) shall be deemed to have accepted and agreed to be bound by the terms and conditions of this Agreement.  As used in this Agreement, “PathGeo” shall mean PathGeo Inc. and any Affiliate of PathGeo Inc. that provides software and/or services to Client.  Each of PathGeo and Client are referred to in this Agreement as a “Party” and collectively as the “Parties.”  This Agreement is effective as of the date it is accepted by Client (“Effective Date”).  Now therefore, for mutually agreeable consideration, the receipt and sufficiency of which are hereby acknowledged, the Parties agree as follows:
+
+1.	DEFINITIONS 
+1.1.	“Affiliate” means any entity that is a subsidiary or parent of Client or is more than 50% owned by Client’s parent entity.  
+1.2.	“PathGeo Services” means a web-based platform that provides clients with the ability to conduct marketing analysis and to monitor customer feedback, and to perform business actions with integrated Geographic Information System (“GIS”) analytics with big data (web pages, social media websites, etc.).
+
+2.	SERVICES
+2.1.	Access and Scope of Use.  PathGeo agrees to provide Client with access to the PathGeo Services (via a password-protected website) to allow Client to analyze customer data, preferences and demographics for Client’s internal business purposes.  Client acknowledges that the use of the PathGeo Services permitted hereunder is strictly limited to Client’s and its Affiliates’ business purposes and that Client agrees that it shall not provide access to the PathGeo Services (whether through sharing its user name and password or otherwise) to any third party nor will it use the PathGeo Services for the benefit of any third party (whether on a service bureau or other outsourced basis).  
+2.2.	Changes; Maintenance; Version Upgrades.  Client acknowledges that the PathGeo Services are not a static service and that PathGeo reserves the right (but does not undertake the obligation) to make changes to the PathGeo Services.  During any period in which Client is current in its maintenance fees, PathGeo will provide bug correction and maintenance services for defects in the PathGeo Services.  For version upgrades to the PathGeo Services (i.e., those that provide additional functionality and features), PathGeo reserves the right to charge Client for enhancements to the features and functionality of the PathGeo Services.  Nothing in this Agreement shall obligate PathGeo to continue to provide access to the PathGeo Services after the termination or expiration of this Agreement and nothing herein shall prevent PathGeo from discontinuing product support and maintenance services for the PathGeo Services.  
+2.3.	Business Recovery.  PathGeo’s business recovery plan is designed to minimize, but not eliminate, risks associated with a disaster affecting the PathGeo data center supporting the PathGeo Services.  PathGeo does not warrant that the PathGeo Services will be uninterrupted or error free. Client is responsible for adopting a business recovery plan relating to disasters affecting Client’s facilities and for securing business interruption insurance or other insurance necessary for Client’s protection.  PathGeo shall maintain commercially reasonable backup procedures including storage of duplicate record files.  In the event of a service disruption due to reasons beyond PathGeo’s control, PathGeo shall use diligent efforts to mitigate the effects of such disruption and restore services.
+2.4.	Network Connectivity and Hardware.  Client will provide at its own expense all equipment, computer software, network equipment, communication lines, and interface devices at Client’s locations required to access the PathGeo Services.  
+2.5.	Exclusions.  PathGeo shall not be responsible for (i) telecommunications or Internet failures or outages, (ii) service interruptions due to disasters, acts of God, or any other act, omission or event beyond PathGeo’s control, (iii) delay or failure of any third party courier or delivery service, (iv) any problem caused by improper use of the PathGeo Services by Client, its Affiliates or any of their respective employees, agents or contractors, (vi) or any security breach of PathGeo or Client’s or its Affiliates’ systems by a hacker, virus, worm, or other intentional in person or electronic interference provided that PathGeo has made reasonable commercial efforts to protect its data and systems.
+2.6.	Terms of Use.  Client will comply with PathGeo’s written terms of use as in effect from time to time.   
+2.7.	Privacy and Collection of Information.  In the use of its websites with its customers, Client warrants that it will comply with all applicable law, including laws relating to privacy, the collection of personal information and allowing customers to make choices regarding the sharing of information.  
+
+3.	TERM AND TERMINATION
+3.1.	Month-to-Month Term.  Unless Client has elected a longer term in the registration process, this Agreement shall commence on the Effective Date and shall continue until terminated in accordance with this Section 3.  In order to terminate this Agreement, a Party shall deliver written notice to the other Party at least 30 days in advance of the effective date of termination.  
+3.2.	Termination by PathGeo.  PathGeo may terminate this Agreement and/or the provision of any of the PathGeo Services at any time for any reason with or without notice to Client, including any improper use of the PathGeo Services or Client’s failure to comply with this Agreement.  Such termination shall not affect any right to relief to which PathGeo and its third party providers and distributors may be entitled, at law or in equity.  Upon termination of this Agreement, all rights granted to Client will terminate and revert to PathGeo and their third party providers or distributors, as applicable.
+3.3.	Effect of Termination.  Any termination or expiration of this Agreement shall not affect any rights or obligations of the Parties that arose prior to such termination or expiration, including without limitation the obligation to make payments then due.      
+
+4.	LICENSE AND INTELLECTUAL PROPERTY
+4.1.	License.  Subject to the terms and conditions of this Agreement, PathGeo hereby grants to Client and its Affiliates’ a non-exclusive, non-transferable, non-sublicensable right to use the PathGeo Services solely for its internal operations and only for the processing of Client's and its Affiliates’ own customer data.  All rights in and to the PathGeo Services are reserved to PathGeo.  Subject to the scope of use described in Section 2.1 above, PathGeo grants to Client a limited, non-exclusive, non-transferable license during the term of this Agreement within the United States to: 
+(a)	Access the PathGeo Services via a browser interface; 
+(b)	use the documentation in support of Client’s use of the PathGeo Services;
+(c)	make a reasonable number of additional copies of the documentation or portions thereof as required to support Client’s use of the PathGeo Services;
+4.2.	Use Restrictions.  Neither Client nor its Affiliates shall, directly, indirectly, alone, or with another party, (i) copy, disassemble, reverse engineer, or decompile any software used to provide the PathGeo Services; (ii) modify, create derivative works based upon, or translate any content or software comprising the PathGeo Services; (iii) transfer or otherwise grant any rights to use the PathGeo Services in any form to any other party, nor shall Client or its Affiliates attempt to do any of the foregoing or cause or permit any third party to do or attempt to do any of the foregoing, except as expressly permitted hereunder.  The PathGeo Services may be accessed by no more than the specified number of users as set forth in the registration process.
+4.3.	Client Data/Client Obligations.  Client owns all right, title and interest in the Client Data.  As used herein, “Client Data” means any of Client's information, documents, or electronic files uploaded to the PathGeo Services by Client or its Affiliates.  Client hereby grants to PathGeo, a non-exclusive, right and license to use, copy, transmit, modify and display the Client Data for purposes of Client's use of the PathGeo Services.  It is Client's responsibility to build any internal interfaces required.  Client shall ensure that only authorized users are assigned login accounts, and shall be liable for any unauthorized use of its login accounts. Client and its Affiliates are responsible for protecting the security and integrity of any user identifiers and/or passwords.
+4.4.	Title to Intellectual Property.  The PathGeo Services, Content (as defined below) and related documentation are (i) proprietary, copyrighted works protected by copyright laws, treaties, and conventions of the United States and worldwide; and (ii) contain trade secrets and Confidential Information (as defined below) of PathGeo protected under applicable law.  PathGeo retains all ownership, right, title, and interest in and to the PathGeo Services, Content and related documentation, and all copyright, trade secret, patent and other intellectual property rights contained therein, subject only to the limited license granted to Client above.  PathGeo shall also exclusively own all changes, modifications, and additions to the PathGeo Services, Content and related documentation, whether made by or on behalf of PathGeo, Client or their employees, agents or otherwise.  To the extent that changes, including all associated intellectual property rights, are not owned in their entirety by PathGeo immediately upon their creation, Client agrees to assign (and hereby automatically assigns) all right, title and interest therein to PathGeo, without any requirement of consideration or further documentation.  Client agrees to take such further action and execute such further documentation as PathGeo may reasonably request to give effect to this Section 4.2.  Client shall not question the validity of any proprietary rights of PathGeo in the PathGeo Services or any other intellectual property right of PathGeo.  
+4.5.	Protection of Proprietary Rights. Client shall not disclose the PathGeo Services (and related documentation) or any portion thereof to any person other than Client’s authorized personnel as necessary to utilize the PathGeo Services as permitted by this Agreement.    
+4.6.	No Post-Termination Rights.  Client acknowledges that the templates, stock photographs, and other materials available for Client’s use through the PathGeo Services (the “Content”) are, pursuant to Section 4.2, the intellectual property of PathGeo.  As such and exclusive of Client Data, Client will not be entitled to receive a copy of any materials created with the PathGeo Services upon expiration or termination of this Agreement.
+
+5.	FEES AND EXPENSES 
+5.1.	Fees.  Client agrees to pay to PathGeo all the applicable subscription fees set forth on PathGeo’s website.  All monthly fees will be paid by credit card or ACH debited from Client’s designated account within five business days from the delivery by PathGeo to Client of an invoice.  If Client withdraws its ACH debit authorization, then Client acknowledges (a) that PathGeo will charge a $15 handling fee for any such month and (b) that such fees must by received by PathGeo upon the fifth business day following the receipt of an invoice.  Client agrees to pay a late payment fee of 1.5% (or the highest rate permitted by applicable law) of the invoice amount for each month or portion thereof that a payment to PathGeo is late.  Additionally, Client agrees to pay PathGeo’s costs of collection, including reasonable attorneys’ fees, for all invoice balances that are not paid on or before the applicable payment date.  PathGeo shall have the right to apply all payments received from Client to any amounts due and payable by Client to PathGeo under the terms of this Agreement.  PathGeo may prospectively increase its fees under this Agreement once per year after the first anniversary of Effective Date by giving written notice of the increase to Client at least 30 days in advance of the effective date of the increase; provided, however, that each such change shall be limited to the greater of 5% or the change in the U.S. Department of Labor, Consumer Price Index for Urban Wage Earners and Clerical Workers, All Cities, (1982=100) for the preceding 12-month period.  
+5.2.	Training.  If training is requested by Client, PathGeo will provide training to Client at PathGeo’s then-current hourly rates, plus out-of-pocket expenses (e.g., travel, etc.), on mutually agreeable dates and times.  All training shall be conducted at a facility pre-approved in writing by PathGeo. Client shall bear all expenses associated with its employees’ attendance at PathGeo’s training sessions.  The duration and scope of training sessions shall be determined exclusively by PathGeo.  All training fees are due in full at the time training is requested by Client and scheduled by PathGeo
+5.3.	Taxes.  Client shall pay all sales, use taxes and other taxes due and payable with respect to the fees payable to PathGeo under this Agreement, except for taxes based upon the net income of PathGeo.  
+
+6.	CLIENT CONTENT
+Client acknowledges that it is responsible for all content incorporated into or uploaded to the PathGeo Services that is not provided by PathGeo (whether such content or owned by Client or otherwise).  Client warrants that that it has the right to use any Client Data, other content, trademarks or other intellectual property incorporated or uploaded by Client, its Affiliates or their personnel into the PathGeo Services and that the use of such Client Data, content, trademarks or other intellectual property will not infringe the intellectual property, proprietary or publicity rights of any third party or misappropriate the trade secret rights of any third party.  
+
+7.	CONFIDENTIALITY
+7.1.	Generally.  Each Party agrees that, absent the express prior written consent of the other Party to the contrary, (a) it will use Confidential Information (as defined below) belonging to the other Party solely for the purposes permitted under this Agreement and (b) it will not disclose Confidential Information belonging to the other to any third party other than its employees, regulators, trading partners and/or agents reasonably requiring such Confidential Information for purposes of this Agreement and who are bound by obligations of nondisclosure and limited use at least as stringent as those contained herein.  Each Party will promptly inform the other Party if it becomes aware of a unauthorized use or disclosure of the Confidential Information of the other Party.  If a Party becomes subject to a legal requirement to disclose the Confidential Information of the other Party, then the Party receiving the disclosure request shall, prior to making disclosure thereunder, give prompt notice to the other Party so that the other Party may seek a protective order at its expense.  
+7.2.	Definition.  For purposes hereof, “Confidential Information” shall mean (i) the terms and conditions of this Agreement, and (ii) any and all information belonging to a Party, whether stored in written, electronic, representational or physical form, which is not at the relevant time (x) known generally to the public through no act or omission in violation of this Agreement or in violation of another duty of confidentiality to such Party, (y) furnished to the disclosing Party by a third party having the lawful right to do so, or (z) known to the disclosing Party prior to disclosure hereunder (as established by written documentation thereof).  Client’s Confidential Information includes the Client Data.  Confidential Information further expressly includes, but is not limited to, trade secrets, software and procedures manuals and documentation, computer programs, data file content and organization, financial data, marketing plans, customer lists and customer account information and similar information to the extent it is within the scope of the preceding sentence.  Each Party shall promptly return to the other upon request any Confidential Information of the other Party then in its possession or under its control.    
+7.3.	Return of Materials.  Upon expiration or termination of this Agreement, Client shall cease using the PathGeo Services provided hereunder and return all documentation and any media containing software to PathGeo.  Each Party shall either return or destroy all Confidential Information pertaining to the other Party within 30 days of expiration or termination of this Agreement.  Each Party shall, upon request of the other, sign a PathGeo-supplied certification attesting to the foregoing.
+
+8.	REPRESENTATIONS AND WARRANTIES  
+Client and PathGeo each represent and warrant to the other, as of the Effective Date, that:  (a) it is validly existing and in good standing under the laws of the jurisdiction of its organization; (b) it has all requisite power and authority to execute and deliver, and to perform its obligations under this Agreement; (c) this Agreement has been duly authorized and executed by it and constitutes its legal, valid and binding obligation; and (d) any consent or authorization of any governmental authority or third party required to be obtained by it in connection with this Agreement has been obtained.     
+
+9.	INDEMNITY 
+9.1.	By Client.  Client shall indemnify, defend and hold harmless PathGeo, its parent, Affiliates, subsidiary companies, and their respective officers, directors, shareholders and employees (collectively, the “PathGeo Indemnitees”) from and against any and all third party claims, demands, actions, suits, causes of action, damages and expenses (including without limitation expenses of investigation, settlement, litigation and attorney’s fees in connection therewith) (collectively all such matters related to third party claims, “Losses”), incurred or sustained by any of the PathGeo Indemnitees and arising from (i)  any breach of any representation, warranty, covenant or agreement made by Client in this Agreement; (ii) Client’s improper or misuse of the PathGeo Services (including without limitation, in violation of applicable laws, rules or regulations, the PathGeo website terms of use or this Agreement); (iii) PathGeo’s compliance with Client’s instructions; or (iv) PathGeo’s use of trademarks, Client Data, content or other materials supplied by Client. 
+9.2.	By PathGeo.  PathGeo shall indemnify, defend and hold harmless Client, its parent, Affiliates, subsidiary companies, and their respective officers, directors, shareholders and employees (collectively, the “Client Indemnitees”) from and against any and all Losses incurred or sustained by any of the Client Indemnitees in the event that (i) PathGeo is finally determined by a court of competent jurisdiction to have infringed the U.S. intellectual property rights a third party through making the PathGeo Services available and (ii) the Client Indemnitee is finally determined by a court of competent jurisdiction to be liable in damages to a third party as a result the Client Indemnitee’s use of the PathGeo Services in accordance with this Agreement. In the performance of the services required by this Agreement, PathGeo shall be entitled to rely solely on the information, representations, and warranties provided by Client pursuant to this Agreement, and shall not be responsible for the accuracy or completeness thereof. PathGeo shall not be responsible for Client’s acts or omissions.  Under no circumstances will PathGeo be liable for errors, acts or failures to act of third parties.       
+9.3.	Indemnification Procedures and Remedies.     
+(a)	For the purposes of this Section, the term “Indemnitee” shall refer to the Person indemnified, or entitled, or claiming to be entitled to be indemnified, pursuant to the provisions of Sections 9.1 and 9.2, as the case may be.  The term “Indemnitor” shall refer to the Person having the obligation to indemnify pursuant to such provisions.   
+(b)	Indemnitee shall give written notice (a “Notice of Claim”) to the Indemnitor within 10 business days after the Indemnitee has knowledge of any claim which an Indemnitee has determined has given or could give rise to a right of indemnification under this Agreement.  No failure to give such Notice of Claim within 10 business days as aforesaid shall affect the indemnification obligations of the Indemnitor hereunder, except to the extent Indemnitor can demonstrate such failure materially prejudiced such Indemnitor’s ability to successfully defend the matter giving rise to the claim.  The Notice of Claim shall state the nature of the claim, the amount of the Losses, if known, and the method of computation thereof, all with reasonable particularity and containing a reference to the provisions of this Agreement in respect of which such right of indemnification is claimed or arises.  The Indemnitor shall have the right to direct the defense of any such claim at its expense through counsel chosen by it and Indemnitor shall have the right to settle such claim on terms and conditions as it deems appropriate, provided that any settlement does not require Indemnitee to admit liability, provide for injunctive relief against Indemnitee or compromise any of Indemnitee’s intellectual property rights.       
+(c)	The indemnity remedies provided in Sections 9.1 and 9.2 shall be a Party’s exclusive remedy for the recovery of Losses resulting from, relating to or arising out of claims by third parties relating to this Agreement.      
+
+10.	LIMITATIONS ON LIABILITY; WARRANTIES
+10.1.	Limitation of Liability.  
+(a)	THE MAXIMUM CUMULATIVE LIABILITY OF PATHGEO TO CLIENT RELATING TO THIS AGREEMENT OR ANY TRANSACTION CONTEMPLATED BY THIS AGREEMENT AND PATHGEO’S MAXIMUM REMEDY TO CLIENT FOR ANY AND ALL CAUSES RELATING TO THIS AGREEMENT AND ANY TRANSACTION CONTEMPLATED BY THIS AGREEMENT WHETHER ARISING IN CONTRACT (INCLUDING BREACH OF CONTRACT OR BREACH OF WARRANTY), IN TORT (INCLUDING NEGLIGENCE AND STRICT LIABILITY), OR ANY OTHER THEORY OF RELIEF (INCLUDING ANY CLAIMS FOR INDEMNIFICATION ARISING UNDER THIS AGREEMENT), SHALL BE LIMITED TO THE AMOUNT OF FEES PAID TO PATHGEO BY CLIENT IN THE SIX (6) MONTHS IMMEDIATELY PRECEDING THE EVENTS THAT GAVE RISE TO THE CLAIM.  THE EXISTENCE OF ONE OR MORE CLAIMS WILL NOT ENLARGE THE FOREGOING LIMIT. The foregoing shall not limit the payment obligations for amounts under Section 5 (Fees and Expenses).
+(b)	IN NO EVENT SHALL EITHER PARTY BE LIABLE TO THE OTHER PARTY FOR ANY SPECIAL, PUNITIVE, INCIDENTAL OR CONSEQUENTIAL DAMAGES (INCLUDING LOST PROFITS) SUSTAINED OR INCURRED REGARDLESS OF THE FORM OF ACTION, WHETHER IN CONTRACT, TORT OR OTHERWISE, INCLUDING WITHOUT LIMITATION NEGLIGENCE, STRICT LIABILITY OR OTHERWISE, AND WHETHER OR NOT SUCH DAMAGES WERE FORESEEN OR UNFORESEEN AND REGARDLESS OF WHETHER A PARTY HAD RECEIVED NOTICE OR HAD BEEN ADVISED, OR KNEW OR SHOULD HAVE KNOWN, OF THE POSSIBILITY OF SUCH DAMAGES OR LOSSES.
+(c)	THE AFOREMENTIONED LIMITATION OF LIABILITY AND EXCLUSION OF DAMAGES PROVISIONS SHALL BE INDEPENDENT OF, AND SHALL SURVIVE, ANY FAILURE OF THE ESSENTIAL PURPOSE OF ANY WARRANTY OR LIMITED REMEDY STATED HEREIN, AND SHALL APPLY EVEN IF A PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.  
+(d)	No action arising under this Agreement, regardless of form, may be brought by either Party more than one year after the cause of action has arisen.
+10.2.	Warranty Disclaimer.  THE PATHGEO SERVICES ARE PROVIDED “AS IS” WITH NO WARRANTY WHATSOEVER. Some jurisdictions do not allow limitations on duration of an implied warranty, so the above limitation may not apply to you.  TO THE FULLEST EXTENT PERMITTED BY LAW, PATHGEO, ITS LICENSORS AND ITS SUPPLIERS DISCLAIM ALL WARRANTIES, WHETHER ORAL OR WRITTEN, EXPRESS OR IMPLIED, INCLUDING, WITHOUT LIMITATION, IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT, WITH REGARD TO THE PATHGEO SERVICES AND THE PROVISION OF OR FAILURE TO PROVIDE TECHNICAL SUPPORT.
+10.3.	Further Limitations.  PathGeo does not warrant any solution against defects where the defect in the solution is caused by: (i) Client’s (or Client’s or its Affiliates’ employees’ or agents’) negligence, (ii) any use of the PathGeo Services in a manner inconsistent with the solution’s intended use or in any manner inconsistent PathGeo’s documentation, (iii) the combination of the PathGeo Services with third party services, hardware or software not provided by PathGeo or approved by PathGeo in writing, or (iv) any alteration, revision, modification, removal or reinstallation of the solution by Client or any third party.  
+11.	GENERAL
+11.1.	Notices.  All notices required or permitted to be given hereunder shall be in writing and shall be deemed given (i) when delivered in person, at the time of such delivery; (ii) when delivered by facsimile transmission, at the time of transmission (provided, however, that notice delivered by facsimile transmission shall only be effective if such notice is also delivered by hand or deposited in the United States mail, postage prepaid, registered, certified or express mail or by courier service within two business days after its delivery by facsimile transmission); (iii) when delivered by a courier service or by express mail, at the time of receipt; or (iv) five business days after being deposited in the United States mail, postage prepaid, registered or certified mail, addressed (in any such case).  The notice address for Client shall be the address provided in the registration process and PathGeo’s notice address shall be:  _________________________________.  Either Party may designate a new notice address and other notice information by giving notice to the other Party in accordance with the provisions hereof.     
+11.2.	Assignment; Change of Control.  Client may not assign this Agreement or any of the rights or duties hereunder to any person without PathGeo’s prior written consent, which, in the case of a purchase of all or substantially all of Client’s business, such consent shall not be unreasonably withheld provided that such an assignment will not increase the scope of Client’s licenses hereunder or impose additional burdens on PathGeo in the provision of the services provided hereunder.  If Client experiences a change of control, any license granted or services agreed to pursuant to this Agreement shall not inure to the benefit of affiliated entities.  PathGeo may freely enter into subcontracts, outsourcing agreements or other arrangements for the performance of its obligations hereunder, but no such arrangement shall impair PathGeo’s liability for its obligations under this Agreement.     
+11.3.	Monitoring.  In order to maintain quality service, telephone communications with Client may be monitored and/or recorded without any further notice.     
+11.4.	Entire Agreement, Modification.  This Agreement, the PathGeo website terms of use and its related schedules, exhibits and addenda contains the entire agreement between the Parties and supersedes all prior agreements, representations, warranties and understandings, whether written or verbal.  PathGeo may at any time modify this Agreement and Client’s continued use of the PathGeo Services will be conditioned upon the terms and conditions in force at the time of such use.   
+11.5.	Waiver.  The waiver by any Party of a breach or default hereunder shall not operate or be construed as a waiver by such Party of any subsequent or other breach or default hereunder, whether or not the subsequent or other breach or default is of the same or similar nature.     
+11.6.	No Third-Party Beneficiaries.  This Agreement shall not be for the benefit of, or enforceable by, any person not a party hereto and shall not confer any rights or remedies upon any party other than the Parties and their respective successors and permitted assigns.     
+11.7.	Severability.  If any provision of this Agreement shall be deemed illegal or otherwise unenforceable, in whole or in part, that provision shall be severed or shall be enforced only to the extent legally permitted, and the remainder of the provision and this Agreement shall remain in full force and effect.            
+11.8.	Independent Contractors.  The Parties hereto are independent contractors and engage in the operation of their respective businesses.  Neither Party shall be considered the agent of the other for any purpose whatsoever.  Nothing herein shall be considered to establish a partnership or joint venture relationship.     
+11.9.	Further Action.  Each Party hereto shall take such further action and shall execute and deliver such further documents as may be reasonably requested by the other Party in order to carry out the provisions and purposes of this Agreement.     
+11.10.	Expenses.  Each of the Parties hereto shall pay its own legal, accounting, expenses incident to the negotiation and preparation of this Agreement.     
+11.11.	U.S. Government Restricted Rights.  If Client is an agency and/or instrumentality of the United States of America, the PathGeo Services are provided subject to the restrictions applicable to other end users in accordance with this Agreement and as provided in applicable FARs and DFARs.
+11.12.	Governing Law; Forum.  This Agreement shall be construed in accordance with and governed by the internal laws of the State of California without regard to its conflict of law provisions.  The Parties agree to submit to the personal jurisdiction of the appropriate courts sitting in San Diego County, Georgia and agree that venue shall lie there.  Each Party waives any objection that such a forum would be inconvenient.  
+11.13.	Injunctive Relief.  The Parties agree that, in addition to any other rights and remedies, which the other or PathGeo may have hereunder, any Party alleging breach or threatened breach of this Agreement will be entitled to such equitable and injunctive relief as may be available from any court of competent jurisdiction to restrain the other from breaching or threatening to breach any of the provisions of this Agreement, without posting bond or other surety.     
+11.14.	Headings, Counterparts. The paragraph headings contained herein are for the purpose of convenience only and are not intended to define or limit the contents of said paragraphs.  This Agreement may be executed in one or more counterparts, all of which taken together shall be deemed one original.     
+11.15.	Survival.  Notwithstanding termination or expiration of this Agreement, Sections 3.5, 5 7, 9, 10 and 11 of this Agreement shall survive such termination or expiration.
+COPYRIGHT © 2013 PATHGEO INC. ALL RIGHTS RESERVED. PATHGEO™, THE PATHGEO LOGO IS A TRADEMARK OF PATHGEO, REGISTERED IN THE USA AND OTHER COUNTRIES. OTHER BRAND AND PRODUCT NAMES (INCLUDING, WITHOUT LIMITATION, TWITTER®.) ARE TRADEMARKS OF THEIR RESPECTIVE OWNERS.
+ 
+							</div>
+						</div>
+					</div>
+					<div id="uploadData_controls" style="width: 95.8%; padding-top: 10px; display: none;">
+						<label for='uploadData_agreementCheck'>I agree</label>
+						<input type='checkbox' id='uploadData_agreementCheck' name='uploadData_agreementCheck' style="float: left; width: 100px;" />
+						<!-- NOTE: There seems to be an issue with Jquery Mobile and this button.  The click button doesn't always fire.  
+						Setting data-role to "none" means that it will not be processed by Jquery Mobile, and the event seems to work now. -->
+						<input id="submit_button" type="button" value="Map Your Data <span>" data-theme="b" style='float:right; '>
+					</div>
+					
+				</fieldset>
+			</form>
+			<img id='geocoding_loading' src="images/loading.gif" width=15px style="display: none;"  />
+		</div>
+		
+		
+		<!--user log in-->
+		<div id='dialog_login' data-role="popup" data-overlay-theme="a" data-theme="c" data-dismissible="false">
+             <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right" >Close</a>
+			 <fieldset id='user_login' style=''>
+                               <!-- <asp:Literal runat="server" ID="litMessage"></asp:Literal>-->
+
+                                <label for="email">Email:</label>
+                                <input type="email" name="email" id="email" value=""  />
+
+                                <label for="password">Password:</label>
+                                <input type="password" name="password" id="password" value="" />
+
+                                <input id="Submit1" type="submit" value="Login" data-role="button" data-inline="true" data-theme="b" onclick="fakeLogin(); $('#dialog_login').popup('close');" />
+
+                                <hr/>
+								
+								<div style='text-align:right'>
+									Don't have a login? <a href="#">Sign Up</a>
+                               		<br />Forgot password? <a href="#">Click here</a>
+								</div>
+            </fieldset>              
+		</div>
+		
+		
+		<!--help-->
+		<div id='dialog_help' data-role="popup" data-overlay-theme="a" data-theme="c" data-dismissible="false" style=''>
+				<a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+				<div id="getsat-widget-5632"></div>
+				
+				<script type="text/javascript" src="https://loader.engage.gsfn.us/loader.js"></script>
+				<script type="text/javascript">
+					if (typeof GSFN !== "undefined") { GSFN.loadWidget(5632,{"containerId":"getsat-widget-5632"}); }
+				</script>
+		</div>
+		
+		
+		<!--lab-->
+		<div id='dialog_lab' data-role="popup" data-overlay-theme="a" data-theme="c" data-dismissible="true" style=''>
+				<a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+				
+				<h2>MapTime Lab: we are working on some new and fun functions for social media!</h2>
+				
+				<!--slider-->
+				<div class="slider-wrapper theme-default" id='slider_wrapper'>
+		            <div id="slider" class="nivoSlider" style=''>
+		                <!--<img src="images/slider/angeliaJolie.png" data-thumb="images/slider/angeliaJolie.png" alt=""  title="Twitter map" />-->
+						<img src="images/slider/hotspot.png" data-thumb="images/slider/hotspot.png" alt=""  title="HotSpot map" />
+		            </div>
+		        </div>
+		</div>
+
+		
+		
+		
+		
+		
+		<!--dataTable-->
+		<!-- data table -->
+		<div id='dataPanel' class='infoPanel'>
+				<!-- intro-->
+				<div id='dataPanel_intro'>
+					<div id='dataPanel_introUploadData' class='ui-corner-all' onclick='$("#dialog_menu").popup("close"); setTimeout(function(){$("#dialog_uploadData").popup("open");}, 200);'>
+						<img src='images/1367841372_Drive_Upload.png'/><p></p>
+						<h1>Upload Data</h1>
+						<label class='menu_description'>Upload you data and <Br>find more patterns with demographic and social media data</label>
+					</div>
+					<P></P><br>
+					<input type='button' value='Try San Francisco Demo Data' style='' onclick='var init_interval=setInterval(function(){if(app.layers.demographicData){clearInterval(init_interval);$("#dialog_menu").popup("close"); showDemo("SAN FRANCISCO");}}, 100)'   />
+					<input type='button' value='Try San Diego Demo Data' style='' onclick='var init_interval=setInterval(function(){if(app.layers.demographicData){clearInterval(init_interval);$("#dialog_menu").popup("close"); showDemo("SAN DIEGO");}}, 100)'   />
+				</div>
+			
+			
+				<!-- dataTable -->
+				<div id='dataTable_control'></div>
+				<table cellpadding="0" cellspacing="0" border="0" class="display" id="dataTable"></table>
+				
+				
+				<!-- dataTable chart-->
+				<div id='dataTable_chart' style='display:none'>
+					<!--chart control-->
+					<div id='dataTable_chartControl' title='Chart settings'  onclick='$("#dataTable_chartControlMenu").css({left:-($("#dataTable_chartControlMenu").width()-10)}).show();'>
+						<img src='images/1365859519_cog.png' width=25px height=25px />
+						<div id='dataTable_chartControlMenu'>
+							Change Chart Type:<br>
+							<fieldset data-role="controlgroup" data-mini="true" data-type="horizontal">
+							 	<!--<input type="radio" name="dataTable_chartType" class="dataTable_chartType" id="dataTable_chartType_area" value="AreaChart" >
+							 	<label for="dataTable_chartType_area">Area Chart</label>
+								<input type="radio" name="dataTable_chartType" class="dataTable_chartType" id="dataTable_chartType_pie" value="PieChart">
+								<label for="dataTable_chartType_pie">Pie Chart</label>-->
+								<input type="radio" name="dataTable_chartType" class="dataTable_chartType" id="dataTable_chartType_bar" value="BarChart" checked="checked">
+								<label for="dataTable_chartType_bar">Bar Chart</label>
+							</fieldset>
+							<hr>
+							Change X and Y axis: 
+							<fieldset data-role="controlgroup" data-type="horizontal">
+								<label for="select_x">X:</label>
+								<select id="select_x" name='select_x' data-mini="true"><option value='none'>Select X Axis</option></select>
+								
+								<label for="select_y">Y:</label>
+								<select id="select_y" name='select_y' data-mini="true"><option value='none'>Select Y Axis</option></select>
+							</fieldset>
+						</div>
+					</div>
+					
+					<!--chart content-->
+					<div id='dataTable_chartContent'></div>
+				</div>
+
+			
+			
+			<!-- dataTable_nav-->
+			<div id='dataTable_nav' style="display:none">
+				<div data-role="navbar">
+				    <ul>
+				        <li><a href="#" class="ui-btn-active" onclick='$("#dataTable_wrapper").show();$("#dataTable_chart").hide();$("#dataTable_control .dataTable_nav ul li a").removeClass("ui-btn-active");$(this).addClass("ui-btn-active")'><img src='images/1365859564_3x3_grid_2.png' /></a></li>
+				        <li><a href="#" onclick='$("#dataTable_wrapper").hide();$("#dataTable_chart").show();$("#dataTable_control .dataTable_nav ul li a").removeClass("ui-btn-active");$(this).addClass("ui-btn-active")'><img src='images/1365860260_chart_bar.png' /></a></li>
+				    </ul>
+				</div>
+			</div>
+		</div>
+		
+		
+		
+
+	
+		<!-- localInfoPanel-->
+		<div id='localInfoPanel' class='infoPanel'>
+			<div id='localInfo' >
+				
+				<!-- business intelligent -->
+				<div id='localInfo_businessActions' style='' class='localInfo_tabs'>
+					<!-- select business actions-->
+					<div id='businessActions_select' class='businessActions_tabs'>
+						<!-- download report -->
+						<label for='businessActions_type'>Business Actions</label>
+						<img id='businessActions_downloadReport' src='images/1367454585_Cloud Download Off.png'  onclick='window.open("images/pathgeo_report.pdf")' title='Download Report' />
+						
+						<select id='businessActions_type' name='businessActions_type' data-mini="true">
+							<optgroup label="About Your Data">
+								<option value='top_users'>Which zipcode has the highest number of customers</option>
+								<option value='top_sales'>Which zipcode has the highest value of sales</option>
+							</optgroup>
+							<optgroup label="About Demographic Data">
+								<option value='avg_income_from_users'>What is the average incomes for my customers</option>
+								<option value='most_language_from_users'>Which languages do users use most</option>
+							</optgroup>
+							<optgroup label="Predict Potential Market">
+								<option value='potential_market'>Where are potential Markets</option>
+							</optgroup>
+						</select>
+						
+						<!-- business actions result-->
+						<div id='businessActions_result'></div>
+					</div>
+					
+					
+					<!-- show the details of business actions, including demographic data-->
+					<div id='businessActions_detail' style='display:none;' class='businessActions_tabs'>
+						<!--header-->
+						<div data-role='header' data-mini-"true" >
+							<a href="#" data-icon="back" onclick='$(".businessActions_tabs").hide(); $("#businessActions_select").show();'>Back</a>
+							<h1 id='businessActions_detailTitle'></h1>
+							<!--<a href="#" data-icon="forward">Export</a>-->
+						</div>
+						<!--content-->
+						<div id='businessActions_detailContent'>
+							<ul id='businessActions_detailContent_listview' data-role='listview' data-count-theme='c' data-inset='true'></ul>
+							<div id='businessActions_detailContent_collapsible' data-role='collapsible-set' data-theme='b' data-content-theme='d'></div>
+						</div>
+					</div>
+					
+				</div>
+					
+			</div>
+		</div>
+		
+		
+		
+		<!-- social media Panel-->
+		<div id='socialMediaPanel' class='infoPanel'>
+			
+				<!-- social media-->
+				<div id='localInfo_socialMedia'  class='localInfo_tabs'>
+					
+					
+	
+					<!-- social media temporal filter -->
+					<!--<div data-role="fieldcontain" style='margin:3px;'>
+						<select id='socialMedia_temporal' name='socialMedia_temporal' data-mini="true">
+							<option value='604800'>last week</option>
+							<option value='2592000'>last month</option>
+							<option value='31536000'>last year</option>
+							<option value='63072000'>last 2 years</option>
+						</select>
+					</div>-->
+					
+					<!-- social media source filter -->
+					<div id='socialMedia_search'>
+						<input id='socialMedia_keyword' name='socialMedia_keyword' type='text' value='Enter a Keyword' data-mini="true" onclick='this.value=""'/>
+					
+						<input type="hidden" id="lat" value="test">
+						<input type="hidden" id="lng" value="test">
+						
+						<!--
+						<ul id='socialMedia_source' >
+							<li title='Twitter' ><img src='images/1368984286_twitter_six_black.png' value='twitter' selected='selected' onclick="this.selected=!this.selected; $(this).attr('selected', this.selected); if(this.selected){this.src='images/1368984286_twitter_six_black.png'}else{this.src='images/1368984257_twitter_six.png'}" /></li>
+							<li title='Flickr' ><img src='images/1368984199_flickr_six_gray.png' value='flickr' selected=false onclick="this.selected=!this.selected; $(this).attr('selected', this.selected); if(this.selected){this.src='images/1368984138_flickr_six_black.png'}else{this.src='images/1368984199_flickr_six_gray.png'}" /></li>
+						</ul>
+						-->
+					
+						<fieldset data-role="controlgroup" data-type="horizontal">
+					        <input type="radio" name="socialMedia_source" id="socialMedia_source_twitter" class='socialMedia_source' value="twitter" checked="checked">
+					        <label for="socialMedia_source_twitter">Twitter</label>
+					        <input type="radio" name="socialMedia_source" id="socialMedia_source_flickr" class='socialMedia_source' value="flickr">
+					        <label for="socialMedia_source_flickr">Flickr</label>
+					    </fieldset>
+						
+						<div id='socialMedia_searchButtonPanel'>
+							<button type='button' id='socialMedia_searchButton' onclick='callPython($("#socialMedia_keyword").val());$("#socialMedia_loading").show();' data-mini="true" data-theme="b" >Search <span><img src='images/loading.gif' id='socialMedia_loading' /></span></button>
+						</div>
+					</div>
+
+						<!--<select id='socialMedia_source' name='socialMedia_source' data-mini="true">
+							<option value='flickr'>Flickr</option>
+							<option value='twitter'>Twitter</option>
+						</select>-->
+					
+
+					<!-- social media gallery -->
+					<div id='socialMedia_gallery'>
+						<h3 style='padding-left:10px; margin-top:10px; color:#eeeeee;'>Social Media Gallery</h3>
+						<ul>
+							<li onclick='' title='Check Tweets about Angelia Jolie @ 2013/05/15'><img src='images/1368984257_twitter_six.png' /><h4>Angelia Jolie</h4>2013/05/15</li>
+							<li onclick='' title=''><img src='images/1368984199_flickr_six_gray.png' /><h4>Shoes</h4>2013/05/17</li>
+							<li onclick='' title=''><img src='images/1368984257_twitter_six.png' /><h4>Angelia Jolie</h4>2013/05/15</li>
+							<li onclick='' title=''><img src='images/1368984257_twitter_six.png' /><h4>Angelia Jolie</h4>2013/05/15</li>
+							<li onclick='' title=''><img src='images/1368984257_twitter_six.png' /><h4>Angelia Jolie</h4>2013/05/15</li>
+							<li onclick='' title=''><img src='images/1368984257_twitter_six.png' /><h4>Angelia Jolie</h4>2013/05/15</li>
+							<li onclick='' title=''><img src='images/1368984257_twitter_six.png' /><h4>Angelia Jolie</h4>2013/05/15</li>
+						</ul>
+					</div>
+
+
+					<!-- change social media map type-->
+					<div id='socialMedia_mapType'>
+						<fieldset data-role="controlgroup" data-type="horizontal">
+					        <input type="radio" name="socialMedia_mapType" id="socialMedia_mapType_point" class='socialMedia_mapType' value="point" checked="checked" onclick='switchLayersMedia("point")' data-theme='a'>
+					        <label for="socialMedia_mapType_point">Point Map</label>
+					        <input type="radio" name="socialMedia_mapType" id="socialMedia_mapType_cluster" class='socialMedia_mapType' value="cluter" onclick='switchLayersMedia("cluster")' data-theme='a'>
+					        <label for="socialMedia_mapType_cluster">Cluster Map</label>
+							<input type="radio" name="socialMedia_mapType" id="socialMedia_mapType_heatmap" class='socialMedia_mapType' value="heatmap" onclick='switchLayersMedia("heatmap")' data-theme='a'>
+					        <label for="socialMedia_mapType_heatmap">HotSpot Map</label>
+					    </fieldset>
+						<label>Map Type: </label>
+					</div>
+					
+					
+					<!-- social media search result-->
+					<div id='socialMedia_result'>
+						<ul data-role="listview" data-inset="true" id="search_results" data-divider-theme="d" data-filter="true" data-filter-placeholder="Filter..."></ul>
+					</div>
+				</div>
+		</div>
+		
+		
+		
+		
+		<!-- userPanel -->
+		<div id='userPanel' class='infoPanel'>
+			 				<fieldset id='user_login' style=''>
+            
+                               <!-- <asp:Literal runat="server" ID="litMessage"></asp:Literal>-->
+
+                                <label for="email">Email:</label>
+                                <input type="email" name="email" id="email" value=""  />
+
+                                <label for="password">Password:</label>
+                                <input type="password" name="password" id="password" value="" />
+
+                                    <input id="Submit1" type="submit" value="Login" data-role="button" data-inline="true" data-theme="b" onclick="fakeLogin()" />
+
+                                <hr />Don't have a login? <a href="#">Sign Up</a>
+                                <br />Forgot password? <a href="#">Click here</a>
+                            </fieldset>
+							
+                            <div id='usermenu_list' style='display:none'>
+                            	<div data-role="collapsible-set" data-theme="b" data-content-theme="d">
+	                                <div data-role="collapsible" data-theme="d" data-content-theme="d" data-inset="true" data-mini="true"  data-iconpos="right" data-collapsed-icon="arrow-d" data-expanded-icon="arrow-u">
+									    <h3>Upgrade Account</h3>
+									   	<p>
+											<form  target="_blank" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+											<input type="hidden" name="cmd" value="_s-xclick">
+											<input type="hidden" name="hosted_button_id" value="9T9WRJH6ECWUS">
+											<table>
+											<tr><td><input type="hidden" name="on0" value="MapTime Services">MapTime Services</td></tr><tr><td><select name="os0">
+												<option value="Basic">Basic $99.00 USD</option>
+												<option value="Standard">Standard $449.00 USD</option>
+												<option value="Premium">Premium $499.00 USD</option>
+											</select> </td></tr>
+											</table>
+											<input type="hidden" name="currency_code" value="USD">
+											<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynowCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+											<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+											</form>
+									   	</p>
+									</div>
+									
+									<div data-role="collapsible" data-theme="d" data-content-theme="d" data-inset="true"  data-mini="true"  data-iconpos="right" data-collapsed-icon="arrow-d" data-expanded-icon="arrow-u">
+									    <h3>History</h3>
+									</div>
+									
+									<div data-role="collapsible" data-theme="d" data-content-theme="d" data-inset="true"  data-mini="true"  data-iconpos="right" data-collapsed-icon="arrow-d" data-expanded-icon="arrow-u">
+									    <h3>Settings</h3>
+									</div>
+									
+									<div data-role="collapsible" data-theme="d" data-content-theme="d" data-inset="true"  data-mini="true"  data-iconpos="right" data-collapsed-icon="arrow-d" data-expanded-icon="arrow-u">
+									    <h3>Log out</h3>
+									</div>
+								</div>
+								<!--
+								<ul data-role="listview" data-inset="true" style="min-width:210px;" data-theme="d">
+                                    <li><a href="#">Upgrade Account</a></li>
+                                    <li><a href="#">History</a></li>
+                                    <li><a href="#">Settings</a></li>
+                                    <li><a href="#">Log out</a></li>
+                                </ul>-->
+                                
+                           </div>
+		</div>
+
+		
+	</div><!-- end pageMap-->
+	
+	
+	
+	
+</body>
+</html>
