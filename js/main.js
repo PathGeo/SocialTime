@@ -1548,7 +1548,7 @@ function callPython(inputValue){
 		var source = $("#socialMedia_search .ui-radio .ui-btn-active").siblings('input').val() || "twitter";
 		var obj = {
 			twitter: {
-				url: "db/demo-flickr.json",//"python/twitter_search.py",
+				url: "python/twitter_search.py", //"db/demo-flickr.json",
 				data: {
 					kwd: keyword,
 					lat: lat,
@@ -1573,7 +1573,7 @@ function callPython(inputValue){
 				}
 			},
 			flickr: {
-				url: "db/demo-flickr.json", //"python/photo_search.py",
+				url: "python/photo_search.py",//"db/demo-flickr.json", 
 				data: {
 					kwd: keyword,
 					lat: lat,
