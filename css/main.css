@@ -108,16 +108,18 @@ html, body {width:100%; height:100%; padding:0px; margin:0px;overflow:hidden; fo
 #socialMedia_search .ui-btn-text span {margin-left:5px; }
 #socialMedia_search .ui-btn-text img {width:15px; display:none;}
 
-#socialMedia_mapType {margin-top:10px;  display:none; height:48px; }
+#socialMedia_mapType {margin-top:20px;  display:none; height:0px; }
 #socialMedia_mapType > label {position:absolute; color:#ffffff; font-weight:bold; top:120px;}
 #socialMedia_mapType fieldset {text-align:right;}
 #socialMedia_mapType fieldset .ui-btn-inner {font-size:11px;}
 
 #socialMedia_result {display:none; height: 82%;}
-#socialMedia_result .ui-li-thumb {width:75px; height:75px; -moz-border-radius:5px; -webkit-border-radius:5px;border-radius:5px;}
-#socialMedia_result .ui-li-heading {position:absolute; top:5px; left:100px; }
+#socialMedia_result .ui-li-thumb {width:60px; height:60px; margin:8px; -moz-border-radius:5px; -webkit-border-radius:5px;border-radius:5px;}
+#socialMedia_result .ui-li-heading {position:absolute; top:10px; left:85px;}
+#socialMedia_result .ui-li-aside {font-size:11px; margin:-8px; }
+#socialMedia_result a span.ui-btn-icon-notext {width:18px; height:18px; right:10px;}
 #socialMedia_result ul {height:100%; width:100%; overflow-y:auto; overflow-x:hidden; margin-top:15px; }
-.socialMedia_description {position:absolute; top:50px; left:100px; }
+.socialMedia_description {position:absolute; top:50px; left:85px; }
 
 #socialMedia_gallery {width:100%; height:90%; margin-top:10px; display:none; }
 #socialMedia_gallery ul {list-style:none; padding:0px; margin:0px;}

@@ -395,174 +395,112 @@ function showLayer(obj, isShow){
 				
 				//parse geojson
 				function parseGeojson(obj){
-					//remove layers
-					var layerNames=["geoJsonLayer", "markerClusterLayer", "heatMapLayer"],
-						showLayerNames=[];
-					$.each(layerNames, function(i,layerName){
-						var layer=obj[layerName];
-						if(layer){
-							//if layer._map has map object, that means the layer is shown in the map
-							if(layer._map){
-								showLayerNames.push(layerName);
-								app.map.removeLayer(layer);
-							}
-							app.controls.toc.removeLayer(layer);
-						}
-					});
-					
-				
 					var layers=[], 
 						zipcodes={},
+						num=0,
 						statisticsColumn=obj.column.statistics;
 						//totalSum=obj.dataTable.statisticsColumn[statisticsColumn].sum;
 					
-			
-					//marker layer
-					obj.geoJsonLayer = new L.geoJson(obj.json, {
-								onEachFeature:function(feature,layer){
-									var html=pathgeo.util.objectToHtml(feature.properties, ["_featureID", "_rowID"]);
-									
-									//highlight keyword
-									html=pathgeo.util.highlightKeyword(obj.keywords,html);
-									
-									//info window
-									layer.bindPopup(html,{maxWidth:500, maxHeight:300});
-									
-								
-									//based on _featureID to insert layer into layers
-									//That means it is the geocoding layer
-									if(feature.properties._featureID>=0){
-										var id=feature.properties["_featureID"];
-										layers[id]=layer;
+					
+					//on each feature
+					function onEachFeature(feature, layer){
+						var props = feature.properties,
+							html='';
 										
-										//if feature contains zipcode field, then calculate information in the feature attribute, e.g. how many users in the zip code, the sum of sales
-										if(feature.properties["zip"]){
-											var code=feature.properties["zip"],
-												columnValue=feature.properties[statisticsColumn];
-											
-											if(zipcodes[code]){
-												var properties=zipcodes[code].feature.properties;
-												properties["extra-ids"].push(id);
-												properties["extra-count"]+=1;
-												properties["extra-"+statisticsColumn+"_sum"]+= columnValue;
-											}else{
-												//assign zipcode layer in the demographic layer to the zipcodes array
-												var zipcodeLayer=app.layers.demographicData.zipcodes[code],
-													properties=zipcodeLayer.feature.properties;
-													
-												properties["extra-ids"]=[id];
-												properties["extra-count"]=1;
-												properties["extra-"+statisticsColumn+"_sum"]=columnValue;
-												
-												zipcodes[code]=zipcodeLayer;
-											}
-										}
+							switch(props.Source){
+								case "flickr":
+									html = "<div class='popup'><ul><li><span class='clusterInfo'>" + props.Title + "</span><br/><img src='" + props.Img + "' alt='...' style='float:left; margin-right:5px'><div class='extras' style='display: block; padding-bottom:20px'> " + props.Account + "<br/><br/>" + props.Date + "</li></ul></div>";
+								break;
+								case "twitter":
+									html = "<div class='popup'><ul><li><span class='clusterInfo'>" + props.Title + "</span><br/><img src='" + props.Img + "' alt='...' style='float:left; margin-right:5px'><div class='extras' style='display: block;'><a href='http://twitter.com/" + props.Account + "' target='_blank'>" + props.Account + "</a><br/><br/>" + props.Date + "</li></ul></div>";
+								break;
+							}
+									
+							//info window
+							layer.bindPopup(html, {maxWidth:500, maxHeight:300});		
+							
+							//id
+							layer.pathgeoID=num;
+							num++;
+							
+							//event
+							layer.on({
+								mouseover: function(e){
+//									console.log(e.target)
+									var target=e.target,
+										img=target._icon;
+									if(target.options.iconHover){
+										img.src=target.options.iconHover.options.iconUrl;
 									}
 									
-									//event
-									layer.on({
-										mouseover: function(e){
-											showLocalInfo(e.target.feature.properties._featureID, {scrollToRow:true, zoomToCenter:false, showPopup:false});
-										},
-										mouseout: function(e){
-											e.target.setIcon(e.target.options.iconDefault)
-											//app.map.closePopup();
-										},
-										click:function(e){
-											console.log('click');
-											//show local info
-											showLocalInfo(e.target.feature.properties._featureID, {scrollToRow:true, zoomToCenter:false});
-										}
-									})
+									$("#search_results").scrollTop($("#search_results li:eq("+target.pathgeoID+")").position().top);
 								},
-								
+								mouseout: function(e){
+									var target=e.target,
+										img=target._icon;
+									if(target.options.iconDefault){
+										img.src=target.options.iconDefault.options.iconUrl;
+									}
+									$("#search_results").scrollTop($("#search_results li:eq(0)").position().top);
+								},
+								click: function(e){
+									
+								}
+							});
+						
+							layers.push(layer);
+					}
+	
+					
+					//point to layer
+					function pointToLayer(feature, latlng){
+						var url='';
+						switch(feature.properties.Source){
+							case "flickr":
+								url="images/newPhoto.png"
+							break;
+							case "twitter":
+								url="images/newTweet.png";
+							break;
+						}
+									
+						var icon=new L.icon({
+							iconUrl: url,
+							iconSize: [24, 29],//[12.5, 21],
+							iconAnchor: [12, 0]
+						});
+									
+						var iconHover=new L.icon({
+							iconUrl:url,
+							iconSize: [24, 29], //[26, 26],
+						  	iconAnchor: [12, 0]
+						});
+						return new L.marker(latlng, {icon: icon, iconHover:iconHover, iconDefault:icon})
+					}
+					
+					
+					
+					//marker layer
+					obj.geoJsonLayer = new L.geoJson(obj.json, {
+								onEachFeature:onEachFeature,
 								//style
 								style:{},
-								
 								//pointToLayer to change layers' icon
-								pointToLayer: function(feature, latlng){
-									var icon=new L.icon({
-											iconUrl: "images/1368754654_stock_draw-circle.png",
-											iconSize: [12, 12],//[12.5, 21],
-											iconAnchor: [6, 6]// [6.25, 10.5]
-									});
-									
-									var iconHover=new L.icon({
-										iconUrl: "images/1368754953_Red Ball.png",
-										iconSize: [18, 18], //[26, 26],
-									   	iconAnchor: [9, 9] //[13, 13]
-									})
-									return new L.marker(latlng, {icon: icon, iconHover:iconHover, iconDefault:icon})
-								}
+								pointToLayer: pointToLayer
 					});
 					obj.geoJsonLayer.layers=layers;
-
-					
-					//zipcodes
-//					var totalColumnValue=obj.dataTable.statisticsColumn[statisticsColumn].sum;
-//					$.each(zipcodes, function(i,zipcodeLayer){
-//						var properties=zipcodeLayer.feature.properties;
-//						
-//						//bind popup on the zipcode layer
-//						zipcodeLayer.bindPopup(
-//							"<div class='zipcodePopup'><h3>Your customers in Zipcode: " + properties["ZIP"] + "</h3>"+
-//							"<ul class='objToHtml'>"+
-//							"<li><b>Total Number: </b>" + properties["extra-count"] + "</li>"+
-//							"<li><b>Total Sales: </b>" + parseFloat(properties["extra-"+statisticsColumn+"_sum"]).toFixed(2) + " (" + parseFloat(properties["extra-"+statisticsColumn+"_sum"] / totalColumnValue).toFixed(4)*100 + "%)</li>"+
-//							"<li><div id='zipcodeChart'></div></li>"+
-//							"</ul>"+
-//							""//"<a href='#' onclick=\"showDemographicData('" + properties["ZIP"] +"');\" style='cursor:pointer;'>See more about the zipcode area.....</a></div>"
-//						);
-//						zipcodeLayer.on('click', function(e){
-//							showZipcodeChart("zipcodeChart", properties["ZIP"], properties["extra-"+statisticsColumn+"_sum"], totalColumnValue);
-//						});
-//					})
-//					obj.zipcodeLayer=zipcodes;
-					
-					
+					obj.geoJsonLayer.addTo(app.map);
 					//add geojsonlayer to toc
 					app.controls.toc.addOverlay(obj.geoJsonLayer, "Marker Map");
 					
 
 					//markercluster layer
 					obj.markerClusterLayer = pathgeo.layer.markerCluster(obj.json, {
-								onEachFeature: function (feature, layer) {
-									var props = feature.properties;
-//									var popupText = '';
-//									
-//									for (var prop in props) { 
-//										var fieldName = prop.charAt(0).toUpperCase() + prop.slice(1);
-//										
-//										if (fieldName.toLowerCase() != "loc") {
-//											popupText += "<b>" + fieldName + "</b>: " + feature.properties[prop] + "<br>";
-//										}
-//									}
-//									
-//									layer.bindPopup(popupText, { maxWidth: 500, maxHeight: 300 } );
-									
-									
-									
-									//event
-									layer.on({
-										mouseover: function(e){
-											
-										},
-										click: function(e){
-											//show local info
-											showLocalInfo(e.target.feature.properties._featureID, {scrollToRow:true, zoomToCenter:false});
-										}
-									});
-								},
-								
-								//pointToLayer
-								pointToLayer: function(feature, latlng){
-									var icon=new L.icon({
-											iconUrl: "images/1368754654_stock_draw-circle.png",
-											iconSize: [12, 12],//[12.5, 21],
-											iconAnchor: [6, 6]// [6.25, 10.5]
-									});
-									return new L.marker(latlng, {icon: icon})
-								}
+								onEachFeature:onEachFeature,
+								//style
+								style:{},
+								//pointToLayer to change layers' icon
+								pointToLayer: pointToLayer
 							},{
 								//clusterclick event
 								clusterclick: function(e){
@@ -628,10 +566,10 @@ function showLayer(obj, isShow){
 					//showLayerNames
 					//if this is the first time to load layers, the showLayerNames will be emplty.
 					//so the default layer is geoJsonLayer
-					if(showLayerNames.length==0){showLayerNames.push("geoJsonLayer");};
-					$.each(showLayerNames, function(i, name){
-						obj.layers.push(obj[name]);
-					})
+//					if(showLayerNames.length==0){showLayerNames.push("geoJsonLayer");};
+//					$.each(showLayerNames, function(i, name){
+//						obj.layers.push(obj[name]);
+//					})
 					
 				}//end parseGeojson
 				
@@ -1554,6 +1492,445 @@ function showZipcodeChart(domID, zipcode, value, totalValue){
 		pathgeo.service.drawGoogleChart(data, [chartOptions], null, null);
 	},10);
 }
+
+
+
+
+//****************************************************************************************************
+var curLayer;
+var curData = [];
+
+
+//Work in Progrss... social media viewing
+function callPython(inputValue){
+	//show loading
+	$("#socialMedia_loading").show();
+	
+	//var keywordTemp = document.getElementById("socialMedia_keyword").value;
+	var keywordTemp='',
+		location="";
+	
+	if(inputValue.split("@").length>1){
+		keywordTemp=inputValue.split("@")[0];
+		location=inputValue.split("@")[1];
+		
+		//lookup geonames for the coordinates of the location
+		pathgeo.service.geonameLookup(location, function(lat, lng, json,error){
+			if(error){alert("Sorry, we cannot locate to the '"+location+"'. Please search again!");return;}
+			
+			app.map.setView(new L.LatLng(lat, lng), 10);
+			search();
+		});
+	}else{
+		keywordTemp=inputValue;
+		search();
+	}
+	
+	
+	
+	function search(){
+		var keywordArray = keywordTemp.split(" ");
+		var keyword = keywordArray[0];
+		for (i = 1; i < keywordArray.length; i++) {
+			keyword = keyword + "+" + keywordArray[i];
+		}
+		
+		//	var lat = document.getElementById("lat").value;
+		//	var lng = document.getElementById("lng").value;
+		//try to get the center latlng of the map view
+		var center = app.map.getCenter();
+		lat = center.lat;
+		lng = center.lng;
+		
+		
+		var rad = 18;
+		var ts = (Math.floor(Date.now() / 1000)) - (63072000);
+		var source = $("#socialMedia_search .ui-radio .ui-btn-active").siblings('input').val() || "twitter";
+		var obj = {
+			twitter: {
+				url: "db/demo-flickr.json",//"python/twitter_search.py",
+				data: {
+					kwd: keyword,
+					lat: lat,
+					lng: lng,
+					rad: rad,
+					ts: ts
+				},
+				readData: function(features){
+					var title, description, image, date, account, html = "";
+					$.each(features, function(i, feature){
+						title = feature.properties.Title;
+						image = feature.properties.Img;
+						date = feature.properties.Date;
+						account = feature.properties.Account;
+						
+						//highlight keyword in the content
+						title=pathgeo.util.highlightKeyword([inputValue],title,true);
+						
+						html += "<li id='"+ i +"'><a hrsef='#'><img src='" + image + "'/><h2>" + account + "</h2><p class='socialMedia_description'>" + title + "</p><p class='ui-li-aside'><strong>" + date.split(" ")[0] + "</strong></p></a><a href='http://twitter.com/" + account + "' target='_blank'>Go to this Tweet</a></li>";
+					});
+					return html;
+				}
+			},
+			flickr: {
+				url: "db/demo-flickr.json", //"python/photo_search.py",
+				data: {
+					kwd: keyword,
+					lat: lat,
+					lng: lng,
+					rad: rad,
+					ts: ts
+				},
+				readData: function(features){
+					var title, description, image, date, account, html = "";
+					$.each(features, function(i, feature){
+						title = feature.properties.Title;
+						description = feature.properties.Description;
+						image = feature.properties.Img;
+						date = feature.properties.Date;
+						account = feature.properties.Account;
+						
+						//highlight keyword in the content
+						title=pathgeo.util.highlightKeyword([inputValue],title,true);
+						
+						html += "<li id='"+ i +"'><a href='#'><img src='" + image + "'/><h2>" + $(account).html() + "</h2><p class='socialMedia_description'>" + title + "</p><p class='ui-li-aside'><strong>" + date.split(" ")[0] + "</strong></p></a>" + account + "</li>";
+					});
+					return html;
+				}
+			}
+		}
+		
+		console.log(lat);
+		console.log(lng);
+		console.log(keyword);
+		console.log(source);
+
+		//ajax
+		if (obj[source]) {
+			var o = obj[source];
+			
+			$.ajax({
+				type: "GET",
+				url: o.url,
+				data: o.data,
+				beforeSend: function(xhr){if (xhr.overrideMimeType) {xhr.overrideMimeType("application/json");}},
+				success: function(contact){
+					if (curLayer && app.map.hasLayer(curLayer)){
+						app.map.removeLayer(curLayer);
+					}
+						
+					if (contact.length == 0 || !contact) {
+						$('#search_results').html('');
+						$("#layer_selector, #socialMedia_loading").hide();
+						alert("No results were found. Please use another keywords or remove location (ex: @) to try again.");
+					}else {
+						//remove layers
+						var layerNames=["geoJsonLayer", "markerClusterLayer", "heatMapLayer"],
+							showLayerNames=[];
+						$.each(layerNames, function(i,layerName){
+							var layer=app.socialMediaResult[layerName];
+							if(layer){
+								//if layer._map has map object, that means the layer is shown in the map
+								if(layer._map){
+									//showLayerNames.push(layerName);
+									app.map.removeLayer(layer);
+								}
+								app.controls.toc.removeLayer(layer);
+							}
+						});
+						
+						//remove class in the map gallery
+						$('.leaflet-control-mapGallery li[layer="geoJsonLayer"]').css({"background-color": '#5B92C0'}).siblings('li').css({"background-color": ''});
+						
+						
+					
+						//create layer
+						app.socialMediaResult={
+							type:"GEOJSON",
+							url: null,
+							json: {
+								type:"FeatureCollection",
+								features:contact
+							},
+							column:{
+								statistics:""
+							},
+							keywords:inputValue,
+							title: "[" + source + "] " + keyword
+						}
+						showLayer(app.socialMediaResult,true);
+						
+						
+						//append source header in the listview
+						$("#search_results").html('')
+											.append("<li data-role='list-divider'>" + source + "<span class='ui-li-count'>" + contact.length + "</span></li>")
+											.append(o.readData(contact))
+											.trigger('create').listview('refresh')
+											.prev().on("keyup",function(){   //if do filter by inputting some keytwords, the count will automatically change
+										    	var count=$("#search_results li:visible").length-1;
+												$("#search_results .ui-li-count").html(count);
+										    });
+						
+						//while clicking on each li in the search_reuslts ul
+						$('#search_results li').on({
+							click:function(e){
+								var $this=$(this),
+									id=$this.attr('id'),
+									layer=app.socialMediaResult.geoJsonLayer.layers[id];	
+								layer.openPopup();	
+							}
+						})
+						
+						$("#point_media").addClass("ui-btn-active");
+						$("#heat_media").removeClass("ui-btn-active");
+						$("#cluster_media").removeClass("ui-btn-active");
+						
+						$("#socialMedia_result, #socialMedia_mapType").show();
+						$("#socialMedia_loading, #socialMedia_gallery").hide();
+						
+						//setDataMedia(contact);
+						//app.map.fitBounds(curLayer.getBounds());
+					}
+				},
+				failure: function(error){
+					console.log(error);
+					alert("There was an error in your search. Please try again");
+					$("#socialMedia_loading").hide();
+				}
+			});
+		}else {
+			console.log('[ERROR] callPython: ' + source + ' is not recognized!');
+		}
+		
+	}//end search function
+}
+
+
+
+
+function getClusterLayerMedia(gjData) {
+	var clusterLayer = new L.MarkerClusterGroup({ 
+		spiderfyOnMaxZoom: false, 
+		showCoverageOnHover: true, 
+		zoomToBoundsOnClick: false,
+		iconCreateFunction: function(cluster) {
+			//return new L.DivIcon({ html: cluster.getChildCount(), className: 'mycluster', iconSize: new L.Point() });
+			var count = cluster.getChildCount();
+			if(curData[0].properties.Source == "twitter"){
+				var image = "newTweet";
+			}
+			else{
+				var image = "newPhoto";
+			}
+			
+			var amount = cluster.getChildCount();
+			if (amount >=10){
+				var icon = "<b style='position:absolute; left:2px; top:0px; color:white'>" + count + "</b><img border='0' src='images/" + image + ".png' width='62' height='74'>";
+			}
+			else if (amount >=5){
+				var icon = "<b style='position:absolute; left:2px; top:0px; color:white'>" + count + "</b><img border='0' src='images/" + image + ".png'  width='50' height='61'>";
+			}
+			else{
+				var icon = "<b style='position:absolute; left:2px; top:0px; color:white; font-size: 10px'>" + count + "</b><img border='0' src='images/" + image + ".png'>";
+			}
+	
+			return new L.DivIcon({ html: icon, className: 'mycluster' });
+		}
+	});
+	
+	
+	clusterLayer.on('clusterclick', function (e) {
+		if(!e.layer._popup) {
+			//Use tables to align everything???
+			var properties = pathgeo.util.readClusterFeatureProperies(e.layer, []);
+			var html = "<div class='popup'><p style='font-weight: 900;'>There are " + e.layer._childCount + " addresses:</p><ul>";
+			$.each(properties, function(i, property){
+				if (property.Source == "flickr") {
+					html += "<li><span class='ui-icon ui-icon-circle-plus iconExpand' style='display:inline-block'></span><span class='clusterInfo'>" + property.Title + "</span><br><div class='extras' style='margin-bottom: 30px;'><img src='" + property.Img + "' alt='...' style='float:left; margin-right:5px'><div class='extras' style='display: block;'> " + property.Account + "<br/><br/>" + property.Date + "</div></li>";
+				}
+				else {
+					html += "<li><span class='ui-icon ui-icon-circle-plus iconExpand' style='display:inline-block'></span><span class='clusterInfo'>" + property.Title + "</span><br><div class='extras' style='margin-bottom: 10px;'><img src='" + property.Img + "' alt='...' style='float:left; margin-right:5px'><div class='extras' style='display: block;'><a href='http://twitter.com/" + property.Account + "' target='_blank'>" + property.Account + "</a><br/><br/>" + property.Date + "</div></li>";
+				}
+			});
+			html+="</ul></div>";
+						
+			e.layer.bindPopup(html,{maxWidth:500, maxHeight:300}).openPopup();
+			
+		} else {
+			e.layer.openPopup();
+		}
+		$(".iconExpand").click(function(e) { 
+			var element = $(this);
+		
+			element.siblings(".extras").toggle();  
+			
+			if (element.hasClass("ui-icon-circle-plus")) {
+				element.removeClass("ui-icon-circle-plus");
+				element.addClass("ui-icon-circle-minus");
+			} else {
+				element.removeClass("ui-icon-circle-minus");
+				element.addClass("ui-icon-circle-plus");
+			}
+		});
+	});
+	
+	
+	clusterLayer.addLayer(getPointLayerMedia(gjData));
+	
+	return clusterLayer;
+}
+
+
+//Excpects an array of geoJson features
+function getPointLayerMedia(gjData) { 
+	var pointLayer = new L.geoJson([], {
+		onEachFeature: function (feature, layer) {
+			var props = feature.properties;
+			if (props.Source == "flickr"){
+				var html = "<div class='popup'><ul><li><span class='clusterInfo'>" + props.Title + "</span><br/><img src='" + props.Img + "' alt='...' style='float:left; margin-right:5px'><div class='extras' style='display: block; padding-bottom:20px'> " + props.Account + "<br/><br/>" + props.Date + "</li></ul></div>";
+			}
+			else {
+				var html = "<div class='popup'><ul><li><span class='clusterInfo'>" + props.Title + "</span><br/><img src='" + props.Img + "' alt='...' style='float:left; margin-right:5px'><div class='extras' style='display: block;'><a href='http://twitter.com/" + props.Account + "' target='_blank'>" + props.Account + "</a><br/><br/>" + props.Date + "</li></ul></div>";
+			}
+			layer.bindPopup(html);
+		}, 	pointToLayer: function (feature, latlng) {
+		
+			var props = feature.properties;
+			var url;
+			if (props.Source == "flickr"){
+				url = "images/newPhoto.png";
+			}
+			else {
+				url = "images/newTweet.png";
+			}
+		
+			var icon = L.icon({ 
+				iconUrl: url,
+				popupAnchor: [1, 1]
+			});
+
+			marker = L.marker(latlng, {icon: icon});
+			return marker; 
+		}  
+	});
+	
+	for (var indx in gjData) {
+		pointLayer.addData(gjData[indx]);
+	}
+	
+	return pointLayer;
+}
+
+function getHeatmapLayerMedia(gjData) {
+	var heatmapLayerMedia = new L.TileLayer.heatMap({ 
+		radius: 40,
+		opacity: 0.75,
+		gradient: {
+			0.45: "rgb(0,0,255)",
+			0.65: "rgb(0,255,255)",
+			0.85: "rgb(0,255,0)",
+			0.98: "yellow",
+			1.0: "rgb(255,0,0)"
+		}
+	});
+	
+	var heatmapDataMedia = [];
+	
+	for (var indx in gjData) {
+		heatmapDataMedia.push( { lat: gjData[indx].geometry.coordinates[1], lon: gjData[indx].geometry.coordinates[0], value: 1 } );
+	}
+	heatmapLayerMedia.setData(heatmapDataMedia);
+	return heatmapLayerMedia;
+}
+
+function switchLayersMedia(newLayerName) { 
+	if (curLayer && app.map.hasLayer(curLayer)) {
+		app.map.removeLayer(curLayer);
+		curLayer=null;
+	}
+	
+	
+	if (newLayerName == "heatmap") {
+		//curLayer = getHeatmapLayerMedia(curData);
+		console.log(curData)
+		curLayer=pathgeo.layer.heatMap(curData, 100, {opacity:0.65});
+		curLayer.addTo(app.map).bringToFront();
+	} else if (newLayerName == "point") { 
+		curLayer = getPointLayerMedia(curData);
+		app.map.addLayer(curLayer);
+	} else if (newLayerName == "cluster") { 
+		curLayer = getClusterLayerMedia(curData);
+		app.map.addLayer(curLayer);
+	} else if (newLayerName == "census") {
+		enableCensusLayer();
+		curLayer = getPointLayerMedia(curData);
+		app.map.addLayer(curLayer);
+	}
+}
+
+
+function setDataMedia(data) {
+	curData = data;
+	switchLayersMedia("point");
+}
+
+
+function filterResults(){
+	var keyword = String(document.getElementById("search").value);
+	
+	var count = curData.length;
+	var newCount = 0;
+	$("#search_results").html('');
+	//$('#social_results_count').html("There are <b>" + count + "</b> results<br/>Seacrh: <input type='text' name='search' id='search' value='' onkeyup='filterResults()'>");
+
+	for(i=0; i<count; i++){
+	
+		if(curData[i].properties.Source == "flickr"){
+		
+			var title = String(curData[i].properties.Title);
+			var n1=title.search(keyword);
+			
+			var description = curData[i].properties.Description;
+			var n2=description.search(keyword);
+			
+			var account = curData[i].properties.Account;
+			var image = curData[i].properties.Img;
+			var date = curData[i].properties.Date;
+
+			
+			if(n1>=0 || n2>=0){
+				var results = "<li><h2>" + title + "</h2><img src='" + image + "' alt='...' style='float:left; margin-right:5px'>" + account + "<br/><p>" + date + "</p><br/></li>";
+				$("#search_results").append(results);
+				newCount++;
+			}
+		}
+		
+		else {
+			var title = curData[i].properties.Title;
+			var n1=title.search(keyword);
+			
+			var image = curData[i].properties.Img;
+			var date = curData[i].properties.Date;
+			var account = curData[i].properties.Account;
+
+			
+			if(n1>=0){
+				var results = "<li><h2>" + title + "</h2><img  src=" + image + " alt='...' style='float:left; margin-right:5px'><a href='http://twitter.com/" + account + "' target='_blank'>@" + account + "</a><br/><p>" + date + "</p><br/></li>";
+				$("#search_results").append(results);
+				newCount++;
+			}
+		}
+		
+		$("#search_results_count").html('');
+		$('#social_results_count').html("There are <b>" + newCount + "</b> results<br/>");
+		$('#search_results').trigger('create');
+		$('#search_results').listview('refresh');
+	}
+
+}
+//****************************************************************************************************
+
+
 
 
 

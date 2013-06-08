@@ -29,7 +29,6 @@ function callPython(inputValue){
 	
 	
 	
-	
 	function search(){
 		var keywordArray = keywordTemp.split(" ");
 		var keyword = keywordArray[0];
@@ -50,7 +49,7 @@ function callPython(inputValue){
 		var source = $("#socialMedia_search .ui-radio .ui-btn-active").siblings('input').val() || "twitter";
 		var obj = {
 			twitter: {
-				url: "python/twitter_search.py",
+				url: "db/demo-flickr.json",//"python/twitter_search.py",
 				data: {
 					kwd: keyword,
 					lat: lat,
@@ -65,13 +64,17 @@ function callPython(inputValue){
 						image = feature.properties.Img;
 						date = feature.properties.Date;
 						account = feature.properties.Account;
+						
+						//highlight keyword in the content
+						title=pathgeo.util.highlightKeyword([inputValue],title,true);
+						
 						html += "<li><a hrsef='#'><img src='" + image + "'/><h2>" + account + "</h2><p class='socialMedia_description'>" + title + "</p><p class='ui-li-aside'><strong>" + date.split(" ")[0] + "</strong></p></a><a href='http://twitter.com/" + account + "' target='_blank'>Go to this Tweet</a></li>";
 					});
 					return html;
 				}
 			},
 			flickr: {
-				url: "python/photo_search.py",
+				url: "db/demo-flickr.json", //"python/photo_search.py",
 				data: {
 					kwd: keyword,
 					lat: lat,
@@ -87,6 +90,9 @@ function callPython(inputValue){
 						image = feature.properties.Img;
 						date = feature.properties.Date;
 						account = feature.properties.Account;
+						
+						//highlight keyword in the content
+						title=pathgeo.util.highlightKeyword([inputValue],title,true);
 						
 						html += "<li><a href='#'><img src='" + image + "'/><h2>" + $(account).html() + "</h2><p class='socialMedia_description'>" + title + "</p><p class='ui-li-aside'><strong>" + date.split(" ")[0] + "</strong></p></a>" + account + "</li>";
 					});
@@ -110,7 +116,6 @@ function callPython(inputValue){
 				data: o.data,
 				beforeSend: function(xhr){if (xhr.overrideMimeType) {xhr.overrideMimeType("application/json");}},
 				success: function(contact){
-				
 					if (curLayer && app.map.hasLayer(curLayer)){
 						app.map.removeLayer(curLayer);
 					}
@@ -131,7 +136,7 @@ function callPython(inputValue){
 							column:{
 								statistics:""
 							},
-							keywords:keywordArray,
+							keywords:inputValue,
 							title: "[" + source + "] " + keyword
 						}
 						showLayer(app.socialMediaResult,true);
@@ -154,8 +159,8 @@ function callPython(inputValue){
 						$("#socialMedia_result, #socialMedia_mapType").show();
 						$("#socialMedia_loading, #socialMedia_gallery").hide();
 						
-						setDataMedia(contact);
-						app.map.fitBounds(curLayer.getBounds());
+						//setDataMedia(contact);
+						//app.map.fitBounds(curLayer.getBounds());
 					}
 				},
 				failure: function(error){
@@ -170,6 +175,7 @@ function callPython(inputValue){
 		
 	}//end search function
 }
+
 
 
 
