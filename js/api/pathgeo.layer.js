@@ -8,12 +8,13 @@ pathgeo.layer={
 	 * @require L.MarkerClusterGroup. please download from https://github.com/Leaflet/Leaflet.markercluster
 	 * @param {geojson} geojson object
 	 * @param {L_geojson_options} L.geojson.options. please refer to https://github.com/Leaflet/Leaflet.markercluster
-	 * @param {object} events, including "clusterclick", "clustermouseover"
+	 * @param {object} events includes clusterclick, clustermouseover, iconCreateFunction(to create a new icon for each cluster)
 	 * @return {object} return object includes .markercluster and .layer(L.geojson)
 	 */
 	markerCluster: function(geojson, L_geojson_options, events){
-		var markercluster= new L.MarkerClusterGroup({spiderfyOnMaxZoom: false, showCoverageOnHover: false, zoomToBoundsOnClick: false });
+		if(!events){events={}}
 		
+		var markercluster= new L.MarkerClusterGroup({spiderfyOnMaxZoom: false, showCoverageOnHover: false, zoomToBoundsOnClick: false, iconCreateFunction:events.iconCreateFunction });
 		
 		if(L_geojson_options && L_geojson_options.onEachFeature){
 			var clone_onEachFeature=L_geojson_options.onEachFeature;

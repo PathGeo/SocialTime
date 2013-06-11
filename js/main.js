@@ -110,7 +110,9 @@ var app={
 	css:{
 		"dataTable_highlightRow":{"background-color":"#ED3D86", "color":"#ffffff"}
 	},
-	$tr:null
+	$tr:null,
+	centerPoint:null,
+	maskCanvas:null
 }
 
 
@@ -189,8 +191,21 @@ function init_map(){
 			if($(e.popup._content).hasClass('zipcodePopup')){
 				$(".leaflet-tile-pane").css({opacity:1, "z-index":2});
 			}
+		},
+		'move':function(e){
+			app.centerPoint.setLatLng(app.map.getCenter());
 		}
 	});
+	
+	
+	//create a center point marker
+	var icon=new L.icon({
+			iconUrl: "images/1370980243_target.png",
+			iconSize: [24, 24],//[12.5, 21],
+			iconAnchor: [12, 12]
+	});		
+	app.centerPoint=new L.marker(app.map.getCenter(), {icon: icon});
+	app.map.addLayer(app.centerPoint)
 }
 
 
@@ -421,6 +436,7 @@ function showLayer(obj, isShow){
 							
 							//id
 							layer.pathgeoID=num;
+							feature.properties.pathgeoID=num;
 							num++;
 							
 							//event
@@ -495,6 +511,7 @@ function showLayer(obj, isShow){
 					
 
 					//markercluster layer
+					num=0;
 					obj.markerClusterLayer = pathgeo.layer.markerCluster(obj.json, {
 								onEachFeature:onEachFeature,
 								//style
@@ -504,22 +521,54 @@ function showLayer(obj, isShow){
 							},{
 								//clusterclick event
 								clusterclick: function(e){
-									if(!e.layer._popup){
-										var properties=pathgeo.util.readClusterFeatureProperies(e.layer, []);
-										var html="<div class='popup'>There are <b>" + e.layer._childCount + "</b> twitters:<p></p><ul>";
+									if(!e.layer._popup) {
+										//Use tables to align everything???
+										var properties = pathgeo.util.readClusterFeatureProperies(e.layer, []);
+										var html = "<div class='popup'><p style='font-weight: 900;'>There are " + e.layer._childCount + " addresses:</p><ul>";
+										
 										$.each(properties, function(i, property){
-											html+="<li><img src='images/1359925009_twitter_02.png' width=20px />&nbsp; &nbsp; <b>"+ property[obj.fieldName.username]+"</b>: "+ property[obj.fieldName.text]+"</li>";
+											if (property.Source == "flickr") {
+												html+= "<li row="+ property.pathgeoID +"><label>" + property.Account + ":</label>" + property.Title +"</li>";
+												//html += "<li><span class='ui-icon ui-icon-circle-plus iconExpand' style='display:inline-block'></span><span class='clusterInfo'>" + property.Title + "</span><br><div class='extras' style='margin-bottom: 30px;'><img src='" + property.Img + "' alt='...' style='float:left; margin-right:5px'><div class='extras' style='display: block;'> " + property.Account + "<br/><br/>" + property.Date + "</div></li>";
+											}else {
+												html += "<li row="+ property.pathgeoID +"><span class='ui-icon ui-icon-circle-plus iconExpand' style='display:inline-block'></span><span class='clusterInfo'>" + property.Title + "</span><br><div class='extras' style='margin-bottom: 10px;'><img src='" + property.Img + "' alt='...' style='float:left; margin-right:5px'><div class='extras' style='display: block;'><a href='http://twitter.com/" + property.Account + "' target='_blank'>" + property.Account + "</a><br/><br/>" + property.Date + "</div></li>";
+											}
 										});
 										html+="</ul></div>";
-										html=html.replace(/undefined/g, "Tweet");
-											
-										//highlight keyword
-										html=pathgeo.util.highlightKeyword(obj.keywords,html);
 													
 										e.layer.bindPopup(html,{maxWidth:500, maxHeight:300}).openPopup();
-									}else{
+									}else {
 										e.layer.openPopup();
 									}
+									
+									$(".popup li").click(function(e) { 
+										console.log($(this).attr('row'))
+										$("#search_results").scrollTop($("#search_results li:eq(" + $(this).attr('row') + ")").position().top);
+									});
+								},
+								
+								//customize cluster icon
+								iconCreateFunction: function(cluster) {
+									//return new L.DivIcon({ html: cluster.getChildCount(), className: 'mycluster', iconSize: new L.Point() });
+								
+									var image='';
+									if(obj.source == "twitter"){
+										image = "newTweet";
+									}else{
+										image = "newPhoto";
+									}
+									
+									var amount = cluster.getChildCount(),
+										icon="";
+									if (amount >=10){
+										icon = "<b style='position:absolute; left:2px; top:0px; color:white'>" + amount + "</b><img border='0' src='images/" + image + ".png' width='62' height='74'>";
+									}else if (amount >=5){
+										icon = "<b style='position:absolute; left:2px; top:0px; color:white'>" + amount + "</b><img border='0' src='images/" + image + ".png'  width='50' height='61'>";
+									}else{
+										icon = "<b style='position:absolute; left:2px; top:0px; color:white; font-size: 10px'>" + amount + "</b><img border='0' src='images/" + image + ".png'>";
+									}
+							
+									return new L.DivIcon({html: icon, className: 'mycluster' });
 								}
 							}
 					);
@@ -532,7 +581,7 @@ function showLayer(obj, isShow){
 					var zoomLevel=app.map.getBoundsZoom(obj.geoJsonLayer.getBounds());
 					var getRadius = function(i){
 						var radius=6.25 * Math.pow(2, (17-zoomLevel+i));
-						radius=(radius >= 5000)?5000:radius;
+						radius=(radius >= 5050)?5050:radius;
 						radius=(radius >= 50)?radius:50;
 						return radius;
 					};
@@ -560,7 +609,24 @@ function showLayer(obj, isShow){
 					$("#heatmap_radius .ui-input-text").html("Change Hot Spot's Radius (unit: Feet)");
 					
 			
-					
+					//maskCanvasLayer
+					var bounds=obj.geoJsonLayer.getBounds(),
+						centerLatLng=bounds.getCenter(),
+						sw=bounds.getSouthWest();
+				
+					var radius=Math.sqrt((Math.pow(centerLatLng.lng - sw.lng,2) + Math.pow(centerLatLng.lat - sw.lat,2)));
+					//convert to meter
+					radius=radius*111000+1000;
+
+					obj.maskCanvasLayer=new L.TileLayer.MaskCanvas({
+					       radius: radius,  // radius in pixels or in meters (see useAbsoluteRadius)
+					       useAbsoluteRadius: true,  // true: r in meters, false: r in pixels
+					       color: '#000',  // the color of the layer
+					       opacity: 0.3,  // opacity of the not coverted area
+					});
+					obj.maskCanvasLayer.setData([[centerLatLng.lat, centerLatLng.lng]]);
+					app.map.addLayer(obj.maskCanvasLayer);
+					app.controls.toc.addOverlay(obj.maskCanvasLayer, "Mask");
 					
 					
 					//showLayerNames
@@ -1519,7 +1585,7 @@ function callPython(inputValue){
 			if(error){alert("Sorry, we cannot locate to the '"+location+"'. Please search again!");return;}
 			
 			app.map.setView(new L.LatLng(lat, lng), 10);
-			search();
+			setTimeout(search, 1000);
 		});
 	}else{
 		keywordTemp=inputValue;
@@ -1541,14 +1607,14 @@ function callPython(inputValue){
 		var center = app.map.getCenter();
 		lat = center.lat;
 		lng = center.lng;
-		
+	
 		
 		var rad = 18;
 		var ts = (Math.floor(Date.now() / 1000)) - (63072000);
 		var source = $("#socialMedia_search .ui-radio .ui-btn-active").siblings('input').val() || "twitter";
 		var obj = {
 			twitter: {
-				url: "python/twitter_search.py", //"db/demo-flickr.json",
+				url: "python/twitter_search.py", //"db/demo-flickr.json",//
 				data: {
 					kwd: keyword,
 					lat: lat,
@@ -1573,7 +1639,7 @@ function callPython(inputValue){
 				}
 			},
 			flickr: {
-				url: "python/photo_search.py",//"db/demo-flickr.json", 
+				url: "python/photo_search.py",//"db/demo-flickr.json", //
 				data: {
 					kwd: keyword,
 					lat: lat,
@@ -1625,7 +1691,7 @@ function callPython(inputValue){
 						alert("No results were found. Please use another keywords or remove location (ex: @) to try again.");
 					}else {
 						//remove layers
-						var layerNames=["geoJsonLayer", "markerClusterLayer", "heatMapLayer"],
+						var layerNames=["geoJsonLayer", "markerClusterLayer", "heatMapLayer", "maskCanvasLayer"],
 							showLayerNames=[];
 						$.each(layerNames, function(i,layerName){
 							var layer=app.socialMediaResult[layerName];
@@ -1642,7 +1708,6 @@ function callPython(inputValue){
 						//remove class in the map gallery
 						$('.leaflet-control-mapGallery li[layer="geoJsonLayer"]').css({"background-color": '#5B92C0'}).siblings('li').css({"background-color": ''});
 						
-						
 					
 						//create layer
 						app.socialMediaResult={
@@ -1656,7 +1721,8 @@ function callPython(inputValue){
 								statistics:""
 							},
 							keywords:inputValue,
-							title: "[" + source + "] " + keyword
+							title: "[" + source + "] " + keyword,
+							source: source
 						}
 						showLayer(app.socialMediaResult,true);
 						
