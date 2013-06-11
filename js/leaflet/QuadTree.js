@@ -23,7 +23,7 @@
 */
 
 /*
-From https://github.com/jsmarkus/ExamplesByMesh/tree/master/JavaScript/QuadTree, slightly modified by domoritz
+From https://github.com/jsmarkus/ExamplesByMesh/tree/master/JavaScript/QuadTree, slightly modified
 */
 
 

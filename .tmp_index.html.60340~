@@ -30,7 +30,6 @@
 	<script src="js/leaflet/heatmap.js" type="text/javascript"></script>
 	<script src="js/leaflet/heatmap-leaflet.js" type="text/javascript"></script>
 	<script src="js/leaflet/QuadTree.js" type="text/javascript"></script>
-	<script src="js/leaflet/L.TileLayer.MaskCanvas.js" type="text/javascript"></script>
 	
 	<!--google map-->
     <script src="https://maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
