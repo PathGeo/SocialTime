@@ -424,10 +424,13 @@ function showLayer(obj, isShow){
 										
 							switch(props.Source){
 								case "flickr":
-									html = "<div class='popup'><ul><li><span class='clusterInfo'>" + props.Title + "</span><br/><img src='" + props.Img + "' alt='...' style='float:left; margin-right:5px'><div class='extras' style='display: block; padding-bottom:20px'> " + props.Account + "<br/><br/>" + props.Date + "</li></ul></div>";
+									html="<div class='popup'><table border=0><tr><td><img src='"+ props.Img+"' class='popup-img ui-corner-all'/></td><td class='popup-content'><label class='popup-account'>"+ props.Account+"</label><label class='popup-date'>" + props.Date + "</label><h4>" + props.Title + "</h4></td></tr></table></div>";
+									//html = "<div class='popup'><ul><li><span class='clusterInfo'>" + props.Title + "</span><br/><img src='" + props.Img + "' alt='...' style='float:left; margin-right:5px'><div class='extras' style='display: block; padding-bottom:20px'> " + props.Account + "<br/><br/>" + props.Date + "</li></ul></div>";
 								break;
 								case "twitter":
-									html = "<div class='popup'><ul><li><span class='clusterInfo'>" + props.Title + "</span><br/><img src='" + props.Img + "' alt='...' style='float:left; margin-right:5px'><div class='extras' style='display: block;'><a href='http://twitter.com/" + props.Account + "' target='_blank'>" + props.Account + "</a><br/><br/>" + props.Date + "</li></ul></div>";
+									html="<div class='popup'><table border=0><tr><td><img src='"+ props.Img+"' class='popup-img ui-corner-all'/></td><td class='popup-content'><a href='http://twitter.com/" + props.Account + "' target='_blank' class='popup-account'>" + props.Account + "</a><label class='popup-date'>" + props.Date + "</label><h4>" + props.Title + "</h4></td></tr></table></div>";
+									//html="<div class='popup'><table border=0><tr><td><img src='"+ props.Img+"' class='popup-img ui-corner-all'/></td><td><div class='popup-content'><h4>" + props.Title + "<h4><br><a href='http://twitter.com/" + props.Account + "' target='_blank'>" + props.Account + "</a><p></p>" + props.Date + "</div></td></tr></table></div>";
+									//html = "<div class='popup'><ul><li><span class='clusterInfo'>" + props.Title + "</span><br/><img src='" + props.Img + "' alt='...' style='float:left; margin-right:5px'><div class='extras' style='display: block;'><a href='http://twitter.com/" + props.Account + "' target='_blank'>" + props.Account + "</a><br/><br/>" + props.Date + "</li></ul></div>";
 								break;
 							}
 									
@@ -1614,7 +1617,7 @@ function callPython(inputValue){
 		var source = $("#socialMedia_search .ui-radio .ui-btn-active").siblings('input').val() || "twitter";
 		var obj = {
 			twitter: {
-				url: "python/twitter_search.py", //"db/demo-flickr.json",//
+				url: "python/twitter_search.py", //"db/demo-twitter.json",//
 				data: {
 					kwd: keyword,
 					lat: lat,

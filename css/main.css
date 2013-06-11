@@ -309,11 +309,17 @@ html, body {width:100%; height:100%; padding:0px; margin:0px;overflow:hidden; fo
 /**
  * popup
  */
+.popup {}
 .popup ul {list-style:none; padding:0px; margin:0px;}
 .popup li {padding:8px; border-top:1px solid #f1f1f1; }
 .popup li:hover {cursor:pointer; background-color:#f1f1f1;}
 .popup li label {margin-right:5px; font-weight:bold;}
-
+.popup .popup-img {margin-right:5px; padding:5px; width:80px; height:80px; }
+.popup .popup-content {padding:5px;min-width:250px;}
+.popup .popup-account {float:left;}
+.popup .popup-date {float:right;}
+.popup h4 {margin-top:30px;margin-bottom:0px;}
+.popup table td {vertical-align:top;}
 
 /**
 * highlight keyword
