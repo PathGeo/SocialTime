@@ -1571,7 +1571,7 @@ var curData = [];
 
 
 //Work in Progrss... social media viewing
-function callPython(inputValue){
+function callPython(inputValue, demoOptions){
 	//show loading
 	$("#socialMedia_loading").show();
 	
@@ -1615,9 +1615,11 @@ function callPython(inputValue){
 		var rad = 18;
 		var ts = (Math.floor(Date.now() / 1000)) - (63072000);
 		var source = $("#socialMedia_search .ui-radio .ui-btn-active").siblings('input').val() || "twitter";
+			source =(demoOptions && demoOptions.source && demoOptions.source!='') ? demoOptions.source : source;
+
 		var obj = {
 			twitter: {
-				url: "python/twitter_search.py", //"db/demo-twitter.json",//
+				url: (demoOptions && demoOptions.url && demoOptions.url!='')?demoOptions.url:"python/twitter_search.py", //"db/demo-twitter.json",//
 				data: {
 					kwd: keyword,
 					lat: lat,
@@ -1642,7 +1644,7 @@ function callPython(inputValue){
 				}
 			},
 			flickr: {
-				url: "python/photo_search.py",//"db/demo-flickr.json", //
+				url: (demoOptions && demoOptions.url && demoOptions.url!='')?demoOptions.url:"python/photo_search.py",//"db/demo-flickr.json", //
 				data: {
 					kwd: keyword,
 					lat: lat,
@@ -1669,6 +1671,7 @@ function callPython(inputValue){
 			}
 		}
 		
+		console.log(obj)
 		console.log(lat);
 		console.log(lng);
 		console.log(keyword);
@@ -1755,7 +1758,7 @@ function callPython(inputValue){
 						$("#cluster_media").removeClass("ui-btn-active");
 						
 						$("#socialMedia_result, #socialMedia_mapType").show();
-						$("#socialMedia_loading, #socialMedia_gallery").hide();
+						$("#socialMedia_loading").hide();
 						
 						//setDataMedia(contact);
 						//app.map.fitBounds(curLayer.getBounds());
@@ -2015,58 +2018,13 @@ function searchBusinessIntelligent(geoname){
 
 
 //show demo
-function showDemo(demoType){
-	var obj=null;
-	
-	//clear all layers
-	if(app.geocodingResult.layers){
-		var layerNames=["geoJsonLayer", "markerClusterLayer", "heatMapLayer"];
-		
-		$.each(layerNames, function(i,layerName){
-			var layer=app.geocodingResult[layerName];
-			if(layer){
-				//if layer._map has map object, that means the layer is shown in the map
-				if(layer._map){
-					app.map.removeLayer(layer);
-					
-					//restore the default background color for the button of map gallery
-					$(".leaflet-control-mapGallery ul li[layer='" + layerName + "']").css('background-color','');
-				}
-				app.controls.toc.removeLayer(layer);
-			}
-		});
-	}
-	
-	switch(demoType){
-		case "SAN FRANCISCO":
-			obj = {
-				url: 'db/demo-SanFrancisco.json',
-				title:'[DEMO] San Francisco shoes customer',
-				column:{
-					statistics:"sales"
-				},
-				keywords: []	
-			}
-		break;
-		case "SAN DIEGO":
-			obj = {
-				url: 'db/demo-SanDiego.json',
-				title:'[DEMO] San Diego demo data',
-				column:{
-					statistics:"Connectory"
-				},
-				keywords: []		
-			}
-		break;
-	}
-	
-	if(obj){
-		obj.type='GEOJSON';
-		app.geocodingResult=obj;
-		
-		//show table
-		showTable(app.geocodingResult);
-	}
+function showDemo(demoType, dom){
+	var keyword=demoType.split("@")[0],
+		source=demoType.split("@")[1],
+		url=$(dom).attr("url");
+	callPython(keyword, {source:source, url:url});
+	$("#dialog_menu").popup("close");
+	showInfoPanel("socialMediaPanel", $("#menuToolbox ul li[title='Search Social Media']")[0]);
 }
 
 
