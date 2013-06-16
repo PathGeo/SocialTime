@@ -28,7 +28,7 @@ count = 0
 for x in range(1,3):
 	time.sleep(1)
 	r = requests.get("http://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=7262b19617c5a5f568a9b3f25c946c5b&tags=" + keyword + "&lat=" + str(lat) + "&lon=" + str(lng) + "&radius=" + str(rad) + "mi&min_upload_date=" + str(ts) + "&per_page=250&page=" + str(x) + "&extras=description,date_upload,date_taken,owner_name,geo,views&has_geo=1&format=json&nojsoncallback=1")
-	output=r.json
+	output=r.json()
 
 	#results = []
 	#count = 0

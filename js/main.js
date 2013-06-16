@@ -498,6 +498,17 @@ function showLayer(obj, isShow){
 					}
 					
 					
+					//filter
+					function filter(feature, layer){
+						var coordinates=feature.geometry.coordinates;
+						if(coordinates[0]==0 && coordinates[1]==0){
+							return false;
+						}else{
+							return true;
+						}
+					}
+					
+					
 					
 					//marker layer
 					obj.geoJsonLayer = new L.geoJson(obj.json, {
@@ -505,7 +516,8 @@ function showLayer(obj, isShow){
 								//style
 								style:{},
 								//pointToLayer to change layers' icon
-								pointToLayer: pointToLayer
+								pointToLayer: pointToLayer,
+								filter:filter
 					});
 					obj.geoJsonLayer.layers=layers;
 					obj.geoJsonLayer.addTo(app.map);
@@ -520,7 +532,8 @@ function showLayer(obj, isShow){
 								//style
 								style:{},
 								//pointToLayer to change layers' icon
-								pointToLayer: pointToLayer
+								pointToLayer: pointToLayer,
+								filter:filter
 							},{
 								//clusterclick event
 								clusterclick: function(e){

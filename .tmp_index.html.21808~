@@ -146,7 +146,6 @@
 					<!--<li onclick='showDemo("angelia@twitter", this)' title='Tweets about Angelia Jolie @ 2013/05/15' url='db/angelina.json'><a href="#"><img src="images/newTweet.png"><h2>Angelia Jolie</h2><p>2013/05/15</p></a></li>-->
 					<li onclick='showDemo("aztecs@twitter", this)' title='Tweets about Aztecs @ 2013/06/07' url='db/demo-twitter.json'><a href="#"><img src="images/newTweet.png"><h2>Aztecs</h2><p>2013/06/07</p></a></li>
 					<li onclick='showDemo("aztecs@flickr", this)' title='Flickr about Aztecs @ 2013/06/07' url='db/demo-flickr.json'><a href="#"><img src="images/newPhoto.png"><h2>Aztecs</h2><p>2013/06/07</p></a></li>
-					<li onclick='showDemo("cake in San Diego@flickr", this)' title='Flickr about cake @ 2013/06/16' url='db/demo-cake@SanDiego.json'><a href="#"><img src="images/newPhoto.png"><h2>Cake@SanDiego</h2><p>2013/06/16</p></a></li>
 				</ul>
 			</div>
 		</div>
