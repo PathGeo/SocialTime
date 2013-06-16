@@ -32,7 +32,7 @@ var app={
 		    onAdd: function (map) {
 	        	// create the control container with a particular class name
 		        var container=L.DomUtil.create('div', 'leaflet-control-mapGallery');
-		        var html="<ul><li title='Marker map' layer='geoJsonLayer' style='background-color:#5B92C0'><img src='images/marker-icon.png' /></li><li title='Cluster map' layer='markerClusterLayer'><img src='images/gallery-cluster.png' /></li><li title='Heat map' layer='heatMapLayer'><img src='images/gallery-heatmap.png' /></li></ul>";
+		        var html="<ul><li title='Marker map' layer='geoJsonLayer' style='background-color:#5B92C0'><img src='images/marker-icon.png' /></li><li title='Cluster map' layer='markerClusterLayer'><img src='images/gallery-cluster.png' /></li><li title='Hotspot map' layer='heatMapLayer'><img src='images/gallery-heatmap.png' /></li></ul>";
        
 		         //click map gallery event
 		        $(container).html(html)
@@ -154,7 +154,7 @@ function init_map(){
     }); 
 	
 	//move the location of zoomcontrol to the bottom right
-	app.map.zoomControl.setPosition("topright");
+	app.map.zoomControl.setPosition("bottomright");
 	
 	//layers control
 	app.controls.toc=L.control.layers(app.basemaps).setPosition("topright");
