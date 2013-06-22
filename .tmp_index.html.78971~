@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>PathGeo-MapTime</title>
+    <title>PathGeo-SocialTime</title>
     <meta name="viewport" http-equiv="Content-Type" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 	
 	<link type="text/css" href='js/jquery/jquery.mobile-1.3.0.min.css' rel="stylesheet" />
@@ -73,7 +73,7 @@
 			
 			<!--<a href="#dialog_login" data-rel='popup' data-role='button' data-position-to="window" data-inline="true" data-transition="fade" data-icon="home" class="" data-mini="true" style='float:right'>Log in</a>-->
 	        <a href="#dialog_help" data-rel='popup' data-role='button' data-position-to="window" data-inline="true" data-transition="fade" data-icon="info" class="" data-mini="true" style='float:right'>Help</a>
-			<a href="#dialog_lab" data-rel='popup' data-role='button' data-position-to="window" data-inline="true" data-transition="fade" data-icon="grid" class="" data-mini="true" style='float:right'>Lab</a>
+			<!--<a href="#dialog_lab" data-rel='popup' data-role='button' data-position-to="window" data-inline="true" data-transition="fade" data-icon="grid" class="" data-mini="true" style='float:right'>Lab</a>-->
 			<a id='test' href="#dialog_menu" data-rel='popup' data-role='button' data-position-to="window" data-inline="true" data-transition="fade" data-icon="grid" class="" data-mini="true" style='float:right'>Menu</a>
 		</div>
 		
@@ -146,6 +146,7 @@
 					<!--<li onclick='showDemo("angelia@twitter", this)' title='Tweets about Angelia Jolie @ 2013/05/15' url='db/angelina.json'><a href="#"><img src="images/newTweet.png"><h2>Angelia Jolie</h2><p>2013/05/15</p></a></li>-->
 					<li onclick='showDemo("aztecs@twitter", this)' title='Tweets about Aztecs @ 2013/06/07' url='db/demo-twitter.json'><a href="#"><img src="images/newTweet.png"><h2>Aztecs</h2><p>2013/06/07</p></a></li>
 					<li onclick='showDemo("aztecs@flickr", this)' title='Flickr about Aztecs @ 2013/06/07' url='db/demo-flickr.json'><a href="#"><img src="images/newPhoto.png"><h2>Aztecs</h2><p>2013/06/07</p></a></li>
+					<li onclick='showDemo("cake in San Diego@flickr", this)' title='Flickr about cake @ 2013/06/16' url='db/demo-cake@SanDiego.json'><a href="#"><img src="images/newPhoto.png"><h2>Cake@SanDiego</h2><p>2013/06/16</p></a></li>
 				</ul>
 			</div>
 		</div>
