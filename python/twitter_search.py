@@ -28,24 +28,35 @@ api = twython.Twython(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_
 geocoder = CityGeocoder()
 	
 tweets = api.search(q=keyword, geocode=lat + "," + lng + "," + rad + "mi", count=100)['statuses']
-for i in range(4):
-	time.sleep(1)
-	tweets += api.search(q=keyword, geocode=lat + "," + lng + "," + rad + "mi", count=100, max_id=tweets[-1].id-1)['statuses']
 
-#Loop through 1st round of Tweets
+#for i in range(4):
+	#time.sleep(1)
+	#tweets += api.search(q=keyword, geocode=lat + "," + lng + "," + rad + "mi", count=100, max_id=tweets[-1]['id']-1)['statuses']
+
+	
 for tweet in tweets:
-	#If the tweet is geotagged, use that lat/lon
-	if tweet['geo'] and tweet['geo']['coordinates'] and tweet['geo']['coordinates'][0] and tweet['geo']['coordinates'][1]:
-		lat, lon = tweet['geo']['coordinates']
-		results.append(dict(type="Feature", geometry=dict(type="Point", coordinates=[glon, glat]), properties=dict(Img=str(tweet['user']['profile_image_url']), Title=tweet['text'], Date=str(tweet['created_at']), Account=str(tweet['user']['screen_name']), Source="twitter")))
-
-	#Or else, if the tweet has a location, try to geocode it
-	elif 'user' in tweet and 'location' in tweet['user']['location']:
-		city, (glat, glon) = geocoder.lookup(tweet['location']encode("ascii", "ignore"))
+	try:
+		text = str(tweet['text'].encode('ascii', 'ignore'))
+		date = str(tweet['created_at'])
+		user_name = str(tweet['user']['screen_name'].encode('ascii', 'ignore'))
+		profile_img = str(tweet['user']['profile_image_url'])
 		
-		#make sure that geocoded lat and lons are within search radius
-		if glat and glon and distance.distance((lat, lng), (glat, glon)).miles <= float(rad):
-			results.append(dict(type="Feature", geometry=dict(type="Point", coordinates=[glon, glat]), properties=dict(Img=str(tweet['user']['profile_image_url']), Title=tweet['text'], Date=str(tweet['created_at']), Account=str(tweet['user']['screen_name']), Source="twitter")))
+		props = dict(Img=profile_img, Title=text, Date=date, Account=user_name, Source="twitter")
+
+		#If the tweet is geotagged, use that lat/lon for location
+		if tweet['geo'] and tweet['geo']['coordinates']:
+			coords = tweet['geo']['coordinates'][::-1]		
+			results.append(dict(type="Feature", geometry=dict(type="Point", coordinates=coords), properties=props))
+
+		#Or else, if the tweet has a location, try to geocode it
+		elif 'user' in tweet and 'location' in tweet['user']['location']:
+			city, (glat, glon) = geocoder.lookup(str(tweet['user']['location'].encode('ascii', 'ignore')))
 			
+			#make sure that geocoded lat and lons are within search radius
+			if glat and glon and distance.distance((lat, lng), (glat, glon)).miles <= float(rad):
+				results.append(dict(type="Feature", geometry=dict(type="Point", coordinates=[glon, glat]), properties=props))
+	except Exception, e:
+		pass
+
 print ''	
 print json.dumps(results)
