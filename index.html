@@ -219,7 +219,7 @@
                                 <input type="email" id="email"></input>   
 
                                 <label for="password">Password:</label>
-                                <input type="password" id="password"></input>
+                                <input type="password" id="password" onkeypress="if(event.keyCode==13){login();}"></input>
 
                                 <input id="Submit1" type="submit" value="Login" data-role="button" data-inline="true" data-theme="b" onclick="login();" />
 

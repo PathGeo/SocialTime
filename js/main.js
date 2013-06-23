@@ -505,9 +505,9 @@ function showLayer(obj, isShow){
 						}
 									
 						var icon=new L.icon({
-							iconUrl: url,
-							iconSize: [24, 29],//[12.5, 21],
-							iconAnchor: [12, 0]
+							iconUrl: feature.properties.Img, //url,
+							iconSize: [30, 30],//[12.5, 21],
+							iconAnchor: [15, 0]
 						});
 									
 						var iconHover=new L.icon({
@@ -515,6 +515,8 @@ function showLayer(obj, isShow){
 							iconSize: [24, 29], //[26, 26],
 						  	iconAnchor: [12, 0]
 						});
+						iconHover=icon;
+						
 						return new L.marker(latlng, {icon: icon, iconHover:iconHover, iconDefault:icon})
 					}
 					
