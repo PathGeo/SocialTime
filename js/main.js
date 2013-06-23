@@ -1629,7 +1629,7 @@ function callPython(inputValue, demoOptions){
 		var ts = (Math.floor(Date.now() / 1000)) - (63072000);
 		var source = $("#socialMedia_search .ui-radio .ui-btn-active").siblings('input').val() || "twitter";
 			source =(demoOptions && demoOptions.source && demoOptions.source!='') ? demoOptions.source : source;
-
+			
 		var obj = {
 			twitter: {
 				url: (demoOptions && demoOptions.url && demoOptions.url!='')?demoOptions.url:"python/twitter_search.py", //"db/demo-twitter.json",//
@@ -1693,7 +1693,7 @@ function callPython(inputValue, demoOptions){
 		//ajax
 		if (obj[source]) {
 			var o = obj[source];
-			
+	
 			$.ajax({
 				type: "GET",
 				url: o.url,
@@ -1704,7 +1704,7 @@ function callPython(inputValue, demoOptions){
 						app.map.removeLayer(curLayer);
 					}
 						
-					if (contact.length == 0 || !contact) {
+					if (!contact || contact.length == 0) {
 						$('#search_results').html('');
 						$("#layer_selector, #socialMedia_loading").hide();
 						alert("No results were found. Please use another keywords or remove location (ex: @) to try again.");
@@ -1777,8 +1777,9 @@ function callPython(inputValue, demoOptions){
 						//app.map.fitBounds(curLayer.getBounds());
 					}
 				},
-				failure: function(error){
+				error: function(error){
 					console.log(error);
+					console.log(error.responseText);
 					alert("There was an error in your search. Please try again");
 					$("#socialMedia_loading").hide();
 				}
