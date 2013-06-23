@@ -24,6 +24,13 @@ html, body {width:100%; height:100%; padding:0px; margin:0px;overflow:hidden; fo
 
 
 /**
+ * log in 
+ */
+#user_login label.ui-input-text {font-size:14px;}
+#dialog_login-screen {position:fixed}
+
+
+/**
  * menu toolbox
  */
 #menuToolbox {position:absolute; left:0px; width:45px; height:100%; text-shadow:0 0px 0 #fff; color:#ffffff; z-index:500;

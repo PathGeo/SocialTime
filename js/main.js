@@ -134,6 +134,8 @@ pathgeo.service.demographicData({
 
 //init
 $(document).on("pageshow", function(){	  
+	init_login();
+
 	init_UI();
    
    	init_map();
@@ -141,6 +143,26 @@ $(document).on("pageshow", function(){
 
 
 
+//init login and read cookie
+function init_login(){
+	//login
+	//console.log($.cookie("SocialTime"));
+	
+	if($.cookie("SocialTime")){
+		$("#header_login").attr("href", "#")
+			.click(function(){
+				$("#header_login").attr("href", "#dialog_logout");
+			})
+			.find(".ui-btn-text").html($.cookie("SocialTime").split("email=")[1]);
+		
+		//show deom menu
+		setTimeout(function(){
+			$("#dialog_menu").popup("open");
+		}, 1000);
+	}else{
+		$("#dialog_login").popup("open");
+	}
+}
 
 
 //init openlayers
@@ -212,7 +234,6 @@ function init_map(){
 
 //init UI
 function init_UI(){
-	
 	//content height
 	$("#content").height($(window).height()-$("#header").height());
 	
@@ -221,7 +242,7 @@ function init_UI(){
 	//if directly show the main menu while initlizing the webpage, the main menu will be immediately disppeared in Chrome (noraml in the Firefo).
 	//JQM said this is the bug from webkit(Goolge chrome) https://github.com/jquery/jquery-mobile/issues/5775
 	setTimeout(function(){
-		$("#dialog_menu").popup("open");
+		//$("#dialog_menu").popup("open");
 	},1000);
 	
 	
@@ -2093,3 +2114,79 @@ function fakeLogin(){
     $("#user_login").hide();                
 }
 
+
+
+//login
+function login(){
+	var email=$("#email").val(),
+		password=$("#password").val();
+	
+	//loading icon
+	$("#login_msg").html("<img src='images/loading.gif' width=20px />")
+	
+	
+	//ajax to check if the email and password are valid
+	$.ajax({
+		url:"python/login.py",
+		data:{
+			email:email,
+			password:password
+		},
+		dataType:"json",
+		method:"post",
+		success:function(e){
+			//clear error msg
+			$("#login_msg").html("");
+
+			if(e.status=='ok'){
+				//close login dialog
+				$('#dialog_login').popup('close');
+				
+				//write cookie
+				$.cookie('SocialTime', 'email='+ email, { expires: 7, path: '/' });
+				
+				//rewite login button
+				$("#header_login").attr("href", "#")
+				.click(function(){
+					$("#header_login").attr("href", "#dialog_logout");
+				})
+				.find(".ui-btn-text").html(email);
+				
+				//close dialog_login and open dialog_menu
+				$("#dialog_login").popup("close");
+				
+				setTimeout(function(){
+					$("#dialog_menu").popup("open");
+				},500);
+				
+			}else{
+				//show error msg
+				$("#login_msg").html(e.msg);
+			}
+			
+			
+		},
+		error: function(e){
+			console.log("[ERROR] Login ajax error!!");
+		}
+	})
+	
+}
+
+
+//log out
+function logout(){
+	//rewite login button
+	$("#header_login").attr("href", "#dialog_login")
+		.click(function(){
+			$("#header_login").attr("href", "#dialog_login");
+		})
+		.find(".ui-btn-text").html("Log in");
+	
+	//clear cookies
+	$.removeCookie('SocialTime', { path: '/' });
+	//console.log("logout: "+ $.cookie("SocialTime"))
+	
+	//close popup
+	$("#dialog_logout").popup('close');
+}
