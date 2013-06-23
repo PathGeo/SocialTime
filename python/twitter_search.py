@@ -27,11 +27,14 @@ api = twython.Twython(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_
 
 geocoder = CityGeocoder()
 	
-tweets = api.search(q=keyword, geocode=lat + "," + lng + "," + rad + "mi", count=100)['statuses']
+tweets = []
+newTweets = api.search(q=keyword, geocode=lat + "," + lng + "," + rad + "mi", count=100)['statuses']
 
-#for i in range(4):
-	#time.sleep(1)
-	#tweets += api.search(q=keyword, geocode=lat + "," + lng + "," + rad + "mi", count=100, max_id=tweets[-1]['id']-1)['statuses']
+while len(newTweets) > 0 and len(tweets) < 300:
+	time.sleep(1)
+	tweets += newTweets
+	newTweets = api.search(q=keyword, geocode=lat + "," + lng + "," + rad + "mi", count=100, max_id=tweets[-1]['id']-1)['statuses']
+
 
 	
 for tweet in tweets:
