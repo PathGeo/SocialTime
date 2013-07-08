@@ -15,6 +15,7 @@ app={
 
 db={
     "pathgeodemo": "demo@42",
+    "socialtime":"socialtimedemo"
 }
 
 
@@ -24,7 +25,7 @@ def getParameterValue(name):
     value="null"
     
     if(name in app["parameter"] and app["parameter"][name].value!=""):
-	value=app["parameter"].getvalue(name)
+        value=app["parameter"].getvalue(name)
 
     return value
 #--------------------------------------------------------------------------

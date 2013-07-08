@@ -265,6 +265,9 @@ function init_UI(){
 	 });
 	 
 
+	//popup not use history to avoid the problem that the dialog cannot be closed and may be redirected to other page
+	$("div[data-role='popup']").popup({history:false});
+	
 	 
 	//when mouse click on otherplace, hide dataTable_menu
 	$(document).mouseup(function(e){
@@ -2174,6 +2177,8 @@ function login(){
 	})
 	
 }
+
+
 
 
 //log out
